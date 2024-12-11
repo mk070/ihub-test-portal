@@ -1,30 +1,49 @@
-from django.db import models
+from pymongo import MongoClient
+from django.conf import settings
 
-# Create your models here.
-from djongo import models
 
-class FileUploadProblems(models.Model):
-    title = models.CharField(max_length=255)
-    level = models.CharField(max_length=50)
-    problem_statement = models.TextField()
-    sample_input_1 = models.TextField(blank=True, null=True)
-    sample_output_1 = models.TextField(blank=True, null=True)
-    sample_input_2 = models.TextField(blank=True, null=True)
-    sample_output_2 = models.TextField(blank=True, null=True)
-    sample_input_3 = models.TextField(blank=True, null=True)
-    sample_output_3 = models.TextField(blank=True, null=True)
-    sample_input_4 = models.TextField(blank=True, null=True)
-    sample_output_4 = models.TextField(blank=True, null=True)
-    hidden_input_1 = models.TextField(blank=True, null=True)
-    hidden_output_1 = models.TextField(blank=True, null=True)
-    hidden_input_2 = models.TextField(blank=True, null=True)
-    hidden_output_2 = models.TextField(blank=True, null=True)
-    hidden_input_3 = models.TextField(blank=True, null=True)
-    hidden_output_3 = models.TextField(blank=True, null=True)
-    hidden_input_4 = models.TextField(blank=True, null=True)
-    hidden_output_4 = models.TextField(blank=True, null=True)
-    hidden_input_5 = models.TextField(blank=True, null=True)
-    hidden_output_5 = models.TextField(blank=True, null=True)
+class FileUploadProblems:
+    collection_name = "FileUpload"
 
-    class Meta:
-        db_table = 'FileUpload'  # MongoDB collection name
+    @staticmethod
+    def get_collection():
+        client = MongoClient(settings.MONGO_DB_CONFIG['HOST'])
+        db = client[settings.MONGO_DB_CONFIG['NAME']]
+        return db[FileUploadProblems.collection_name]
+
+    @staticmethod
+    def create_problem(data):
+        """
+        Create a new problem document.
+        """
+        collection = FileUploadProblems.get_collection()
+        return collection.insert_one(data).inserted_id
+
+    @staticmethod
+    def get_problem_by_id(problem_id):
+        """
+        Fetch a problem document by its ID.
+        """
+        from bson.objectid import ObjectId
+        collection = FileUploadProblems.get_collection()
+        return collection.find_one({"_id": ObjectId(problem_id)})
+
+    @staticmethod
+    def update_problem(problem_id, updated_data):
+        """
+        Update a problem document.
+        """
+        from bson.objectid import ObjectId
+        collection = FileUploadProblems.get_collection()
+        result = collection.update_one({"_id": ObjectId(problem_id)}, {"$set": updated_data})
+        return result.modified_count
+
+    @staticmethod
+    def delete_problem(problem_id):
+        """
+        Delete a problem document by its ID.
+        """
+        from bson.objectid import ObjectId
+        collection = FileUploadProblems.get_collection()
+        result = collection.delete_one({"_id": ObjectId(problem_id)})
+        return result.deleted_count

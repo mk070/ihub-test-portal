@@ -86,18 +86,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'test_portal_db', 
-        'ENFORCE_SCHEMA': False,  # Helps bypass schema-related issues
-        'CLIENT': {
-            'host': 'mongodb+srv://ihub:ihub@test-portal.lcgyx.mongodb.net/test_portal_db?retryWrites=true&w=majority',
-            # Ensure the database name is included in the connection string if needed
-            # 'username': 'ihub',  # Optional: If not included in the connection string
-            # 'password': 'ihub',  # Optional: If not included in the connection string
-            # 'authSource': 'admin',  # Typically 'admin' or the database name for auth
-        }
-    }
+    
 }
 ALLOWED_HOSTS = ['*']
 
