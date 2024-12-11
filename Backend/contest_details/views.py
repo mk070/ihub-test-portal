@@ -18,9 +18,9 @@ final_questions_collection = db["finalQuestions"]
 
 
 def get_contests(request):
-    contests = ContestDetails.objects.all()
-    contests_list = list(contests.values())
-    return JsonResponse(contests_list, safe=False)
+    # Fetch all contests from the Contest_Details collection
+    contests = list(contest_collection.find({}, {"_id": 0}))  
+    return JsonResponse(contests, safe=False)
 
 @csrf_exempt
 def delete_contest(request, contest_id):
