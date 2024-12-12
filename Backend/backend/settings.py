@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "compile",
+    "coding",
     "corsheaders",  # Add this line
 ]
 
@@ -52,7 +52,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "coding_platform.urls"
+ROOT_URLCONF = "backend.urls"
 
 TEMPLATES = [
     {
@@ -70,7 +70,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "coding_platform.wsgi.application"
+WSGI_APPLICATION = "backend.wsgi.application"
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Add the origin of your frontend application

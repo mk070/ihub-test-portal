@@ -23,11 +23,11 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("",include('compile.urls')),
-    path("",include('contest_details.urls')),
-    path("",include('problems.urls')),
-    path("",include('manualProblems.urls')),
-    path("",include('fetchProblems.urls')),
+    path("",include('coding.urls')),
+    # path("",include('contest_details.urls')),
+    # path("",include('problems.urls')),
+    # path("",include('manualProblems.urls')),
+    # path("",include('fetchProblems.urls')),
     path('api/staff/', include('staff.urls')),
     path('api/student/', include('student.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
