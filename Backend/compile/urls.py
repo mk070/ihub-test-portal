@@ -2,6 +2,7 @@ from django.urls import path
 from . import views, views_auto, views_user
 from . import views_contest
 from .views_contest import *
+from . import views
 
 urlpatterns = [
     path('compile/',views.compileCode,name='compile'),
