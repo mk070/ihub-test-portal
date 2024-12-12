@@ -47,3 +47,5 @@ class FileUploadProblems:
         collection = FileUploadProblems.get_collection()
         result = collection.delete_one({"_id": ObjectId(problem_id)})
         return result.deleted_count
+    
+

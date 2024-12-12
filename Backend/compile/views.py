@@ -32,6 +32,7 @@ def compileCode(request):
 
         test_case = 'samples'
         response = compile.compilecode(PROBLEMS_FILE_PATH, problem_id, user_code, test_case, language)
+        print(user_code)
         return response
 
     return JsonResponse({"error": "Invalid request method."}, status=405)
