@@ -1,127 +1,109 @@
+// QuestionLibrary.js
 import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  Checkbox,
+} from "@mui/material";
+import axios from "axios";
 
-const CodingQuestions = () => {
+const QuestionLibrary = () => {
   const [questions, setQuestions] = useState([]);
-  const [filteredQuestions, setFilteredQuestions] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedQuestions, setSelectedQuestions] = useState([]);
 
-  // Fetch data from Django API on mount
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/questions/") // Replace with your Django API endpoint
-      .then((response) => response.json())
-      .then((data) => {
-        setQuestions(data);
-        setFilteredQuestions(data); // Initialize filtered questions
-      })
-      .catch((error) => console.error("Error fetching questions:", error));
+    const fetchQuestions = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/manualProblems/");
+        setQuestions(response.data.problems);
+      } catch (error) {
+        console.error("Failed to fetch questions:", error);
+      }
+    };
+
+    fetchQuestions();
   }, []);
 
-  // Filter questions based on search query
-  const handleSearch = (e) => {
-    const query = e.target.value.toLowerCase();
-    setSearchQuery(query);
-
-    const filtered = questions.filter(
-      (q) =>
-        q.name.toLowerCase().includes(query) ||
-        q.description.toLowerCase().includes(query)
+  const handleQuestionSelect = (id) => {
+    setSelectedQuestions((prev) =>
+      prev.includes(id) ? prev.filter((qId) => qId !== id) : [...prev, id]
     );
-    setFilteredQuestions(filtered);
   };
 
-  const styles = {
-    container: {
-      padding: "20px",
-      fontFamily: "Arial, sans-serif",
-    },
-    heading: {
-      textAlign: "center",
-      fontSize: "24px",
-      fontWeight: "bold",
-      marginBottom: "20px",
-    },
-    searchContainer: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: "20px",
-    },
-    searchInput: {
-      padding: "10px",
-      width: "100%",
-      maxWidth: "300px",
-      border: "1px solid #ccc",
-      borderRadius: "4px",
-    },
-    section: {
-      marginBottom: "20px",
-    },
-    sectionHeading: {
-      fontSize: "18px",
-      fontWeight: "bold",
-      marginBottom: "10px",
-    },
-    questionList: {
-      listStyleType: "none",
-      padding: "0",
-    },
-    questionItem: {
-      display: "flex",
-      alignItems: "center",
-      marginBottom: "10px",
-    },
-    checkbox: {
-      marginRight: "10px",
-    },
-    questionDetails: {
-      display: "flex",
-      flexDirection: "column",
-    },
-    questionName: {
-      fontWeight: "bold",
-    },
-    questionDescription: {
-      fontSize: "14px",
-      color: "#666",
-    },
+  const handleSubmit = () => {
+    console.log("Selected Questions:", selectedQuestions);
+    // Add your submit logic here
+    alert("Questions submitted successfully!");
   };
-
-  const renderSection = (title) => (
-    <div style={styles.section}>
-      <h3 style={styles.sectionHeading}>{title}</h3>
-      <ul style={styles.questionList}>
-        {filteredQuestions.map((question) => (
-          <li key={question.id} style={styles.questionItem}>
-            <input type="checkbox" style={styles.checkbox} />
-            <div style={styles.questionDetails}>
-              <span style={styles.questionName}>{question.name}</span>
-              <span style={styles.questionDescription}>
-                {question.description}
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.heading}>Coding Questions</h1>
-      <div style={styles.searchContainer}>
-        <input
-          type="text"
-          placeholder="Search questions..."
-          value={searchQuery}
-          onChange={handleSearch}
-          style={styles.searchInput}
-        />
-      </div>
-      {renderSection("Questions Library")}
-      {renderSection("Create Questions")}
-      {renderSection("Bulk Upload")}
-    </div>
+    <Box p={4}>
+      <Typography variant="h4" align="center" gutterBottom>
+        Question Library
+      </Typography>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  indeterminate={
+                    selectedQuestions.length > 0 &&
+                    selectedQuestions.length < questions.length
+                  }
+                  checked={
+                    questions.length > 0 &&
+                    selectedQuestions.length === questions.length
+                  }
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedQuestions(questions.map((q) => q.id));
+                    } else {
+                      setSelectedQuestions([]);
+                    }
+                  }}
+                />
+              </TableCell>
+              <TableCell>Title</TableCell>
+              <TableCell>Description</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {questions.map((question) => (
+              <TableRow key={question.id} hover>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={selectedQuestions.includes(question.id)}
+                    onChange={() => handleQuestionSelect(question.id)}
+                  />
+                </TableCell>
+                <TableCell>{question.title}</TableCell>
+                <TableCell>{question.problem_statement}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Box display="flex" justifyContent="center" mt={4}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSubmit}
+          disabled={selectedQuestions.length === 0}
+        >
+          Submit
+        </Button>
+      </Box>
+    </Box>
   );
 };
 
-export default CodingQuestions;
+export default QuestionLibrary;
