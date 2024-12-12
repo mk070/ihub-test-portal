@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import CreateContest from './pages/CreateContest';
+import Questions from './pages/Questions';
 import ContestPage from './pages/ContestPage';
 import StartContest from './pages/StartContest';
 import SelectTestOption from './pages/SelectTestOption';
@@ -69,7 +70,7 @@ function App() {
           <Route path="/OnebyOne" element={<OnebyOne />} />
           <Route path="/ManualPage/:contestId" element={<ManualPage />} />
           <Route path="/CreateContest" element={<CreateContest />} />
-          <Route path="/StartContest" element={<StartContest />} />
+          <Route path="/Questions/:contestId" element={<Questions />} />          <Route path="/StartContest" element={<StartContest />} />
           <Route path="/viewcontest/:contestId" element={<ViewContest />} />
         </Route>
         <Route path="/testinstructions/:testId" element={<TestInstructions />} />

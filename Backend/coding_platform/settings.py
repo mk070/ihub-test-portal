@@ -42,8 +42,11 @@ INSTALLED_APPS = [
     "manualProblems",
     "fetchProblems",
     "corsheaders",  # Add this line
+    "staff",  # Add your app here
+    'rest_framework',
+    'django_extensions',
 ]
-
+CSRF_COOKIE_SECURE = False
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -74,6 +77,7 @@ TEMPLATES = [
     },
 ]
 
+CORS_ALLOWED_ORIGINS = True
 WSGI_APPLICATION = "coding_platform.wsgi.application"
 
 CORS_ALLOWED_ORIGINS = [
@@ -83,6 +87,7 @@ CORS_ALLOWED_ORIGINS = [
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",  # Frontend origin
+    'http://127.0.0.1:8000'
 ]
 
 DATABASES = {
@@ -144,6 +149,15 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # CORS_ALLOW_ALL_ORIGINS = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',  # If using token-based auth
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
