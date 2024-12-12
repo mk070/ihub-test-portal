@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
-import CreateContest from './pages/CreateContest';
-import Questions from './pages/Questions';
-import ContestPage from './pages/ContestPage';
-import StartContest from './pages/StartContest';
-import SelectTestOption from './pages/SelectTestOption';
-import FileUpload from './pages/FileUpload';
-import ManualSelectUI from './pages/ManualSelectUI';
-import HrUpload from './pages/HrUploadPage';
-import OnebyOne from './pages/OnebyOne';
-import ManualPage from './pages/ManualPage';
-import ContestDashboard from './pages/ContestDashboard';
+import CreateContest from './pages/staff/coding/CreateContest';
+import ContestPage from './pages/staff/coding/ContestPage';
+import StartContest from './pages/staff/coding/StartContest';
+import SelectTestOption from './pages/staff/coding/SelectTestOption';
+import FileUpload from './pages/staff/coding/FileUpload';
+import ManualSelectUI from './pages/staff/coding/ManualSelectUI';
+import HrUpload from './pages/staff/coding/HrUploadPage';
+import OnebyOne from './pages/staff/coding/OnebyOne';
+import ManualPage from './pages/staff/coding/ManualPage';
+import ContestDashboard from './pages/staff/coding/ContestDashboard';
 import Login from './pages/staff/Login';
 import Signup from './pages/staff/Signup';
 import Dashboard from './pages/staff/Dashboard';
@@ -22,7 +21,9 @@ import StudentProfile from './pages/student/StudentProfile';
 import Navbar from './pages/student/Navbar';
 import StaffNavbar from './pages/staff/StaffNavbar';
 import TestInstructions from './pages/student/TestInstruction';
-import ViewContest from './pages/ViewContest';
+import ViewContest from './pages/staff/coding/ViewContest';
+import Assesment from './pages/staff/coding/Assesment';
+import QuestionsLibrary from './pages/staff/coding/QuestionsLibrary';
 
 // Layout component for wrapping student routes
 const StudentLayout = () => (
@@ -62,6 +63,8 @@ function App() {
         <Route path="/staffsignup" element={<Signup />} />
         <Route element={<StaffLayout />}>
           <Route path="/staffdashboard" element={<Dashboard />} />
+          <Route path="/assesment" element={<Assesment />} />
+          <Route path="/questionslibrary" element={<QuestionsLibrary />} />
           <Route path="/coding" element={<ContestDashboard />} />
           <Route path="/SelectTestOption" element={<SelectTestOption />} />
           <Route path="/FileUpload" element={<FileUpload />} />
