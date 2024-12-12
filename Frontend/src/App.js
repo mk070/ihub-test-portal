@@ -7,7 +7,7 @@ import SelectTestOption from './pages/staff/coding/SelectTestOption';
 import FileUpload from './pages/staff/coding/FileUpload';
 import ManualSelectUI from './pages/staff/coding/ManualSelectUI';
 import HrUpload from './pages/staff/coding/HrUploadPage';
-import OnebyOne from './pages/OnebyOne';
+import OnebyOne from './pages/staff/coding/OnebyOne';
 import ManualPage from './pages/staff/coding/ManualPage';
 import ContestDashboard from './pages/staff/coding/ContestDashboard';
 import Login from './pages/staff/Login';
