@@ -1,17 +1,14 @@
-// CreateContest.js
 import React, { useState } from 'react';
-import Questions from './Questions';
 
 const CreateContest = () => {
     const [contestData, setContestData] = useState({
-        contestName: '',
+        assessmentName: '',
         startDate: '',
         startTime: '',
         endDate: '',
         endTime: '',
         noEndTime: false,
-        organizationType: '',
-        organizationName: ''
+        guidelines: [''],
     });
 
     const handleChange = (e) => {
@@ -22,9 +19,94 @@ const CreateContest = () => {
         });
     };
 
+    // Usage in the frontend when you receive the contestId
+
+
     const handleNext = () => {
-        // Logic to navigate to Questions
-        window.location.href = '/Questions'; // Assuming routing is set up
+        // Check if the startDate and startTime are set
+        if (!contestData.startDate || !contestData.startTime) {
+            alert('Start date and time must be provided.');
+            return;
+        }
+
+        // Ensure the endDate and endTime are properly set
+        let startDateTime = `${contestData.startDate}T${contestData.startTime}:00`; // Adding seconds
+        let endDateTime = `${contestData.endDate}T${contestData.endTime}:00`; // Adding seconds
+
+        // Handle the case where no end time is set
+        if (contestData.noEndTime) {
+            endDateTime = null; // Or handle it according to your needs
+        }
+
+        // Now proceed to call your API with the correctly formatted date-time
+        const contestPayload = {
+            assessmentName: contestData.assessmentName,
+            startDateTime: startDateTime,
+            endDateTime: endDateTime,
+            guidelines: contestData.guidelines,
+            // add other fields
+        };
+
+        // Perform the API call here
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();  // Prevent default form submission
+
+        const formData = {
+            assessmentName: contestData.assessmentName,  // assessmentName instead of contestName
+            startDate: contestData.startDate, // Should match backend
+            startTime: contestData.startTime, // Should match backend
+            endDate: contestData.endDate,
+            endTime: contestData.endTime,
+            guidelines: contestData.guidelines,  // Sending guidelines data
+        };
+
+        // Validate input data before sending it to backend
+        if (!contestData.assessmentName || !contestData.startDate || !contestData.startTime) {
+            alert('Assessment name, start date, and start time must be provided.');
+            return;
+        }
+
+        // Ensure the endDate and endTime are properly set
+        let startDateTime = `${contestData.startDate}T${contestData.startTime}:00`; // Adding seconds
+        let endDateTime = `${contestData.endDate}T${contestData.endTime}:00`; // Adding seconds
+
+        // Handle the case where no end time is set
+        if (contestData.noEndTime) {
+            endDateTime = null; // Or handle it according to your needs
+        }
+
+        // Prepare the payload
+        const contestPayload = {
+            assessmentName: contestData.assessmentName, // assessmentName in payload
+            startDateTime: startDateTime,
+            endDateTime: endDateTime,
+            guidelines: contestData.guidelines, // guidelines data
+        };
+
+        // Perform the API call to create the contest
+        try {
+            const response = await fetch('http://localhost:8000/api/create-assessment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(contestPayload),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.contestId) {
+                // Redirect to the questions page with the contestId
+                window.location.href = `/Questions/${data.contestId}`; // Assuming the URL is something like /questions/{contestId}
+            } else {
+                alert('Error creating contest: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Something went wrong. Please try again.');
+        }
     };
 
     return (
@@ -36,16 +118,16 @@ const CreateContest = () => {
 
             <h2 className="text-3xl font-semibold mb-6">Create Contest</h2>
 
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="form-group">
-                    <label htmlFor="contestName" className="block text-gray-700">Contest Name</label>
+                    <label htmlFor="assessmentName" className="block text-gray-700">Assessment Name</label>
                     <input
                         type="text"
-                        id="contestName"
-                        name="contestName"
-                        value={contestData.contestName}
+                        id="assessmentName"
+                        name="assessmentName"
+                        value={contestData.assessmentName}
                         onChange={handleChange}
-                        placeholder="Enter contest name"
+                        placeholder="Enter assessment name"
                         className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </div>
@@ -116,38 +198,39 @@ const CreateContest = () => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="organizationType" className="block text-gray-700">Organization Type</label>
-                    <input
-                        type="text"
-                        id="organizationType"
-                        name="organizationType"
-                        value={contestData.organizationType}
-                        onChange={handleChange}
-                        placeholder="Enter organization type"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <label htmlFor="guidelines" className="block text-gray-700">Guidelines</label>
+                    {contestData.guidelines.map((guideline, index) => (
+                        <div key={index}>
+                            <input
+                                type="text"
+                                value={guideline}
+                                onChange={(e) => {
+                                    const newGuidelines = [...contestData.guidelines];
+                                    newGuidelines[index] = e.target.value;
+                                    setContestData({ ...contestData, guidelines: newGuidelines });
+                                }}
+                                placeholder={`Guideline ${index + 1}`}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                    ))}
+                    <button
+                        type="button"
+                        onClick={() => setContestData({ ...contestData, guidelines: [...contestData.guidelines, ''] })}
+                        className="mt-2 text-blue-600"
+                    >
+                        Add Another Guideline
+                    </button>
                 </div>
 
-                <div className="form-group">
-                    <label htmlFor="organizationName" className="block text-gray-700">Organization Name</label>
-                    <input
-                        type="text"
-                        id="organizationName"
-                        name="organizationName"
-                        value={contestData.organizationName}
-                        onChange={handleChange}
-                        placeholder="Enter organization name"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                <div className="flex justify-end">
+                    <button
+                        type="submit"
+                        className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        Create Contest
+                    </button>
                 </div>
-
-                <button
-                    type="button"
-                    onClick={handleNext}
-                    className="w-full py-3 mt-6 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                    Next
-                </button>
             </form>
         </div>
     );
