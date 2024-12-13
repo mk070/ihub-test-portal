@@ -72,6 +72,7 @@ function App() {
           <Route path="/OnebyOne" element={<OnebyOne />} />
           <Route path="/ManualPage/:contestId" element={<ManualPage />} />
           <Route path="/CreateContest" element={<CreateContest />} />
+
           <Route path="/Questions/:contestId" element={<Questions />} />
           <Route path="/QuestionsLibrary/:contestId" element={<QuestionsLibrary />} />          
           <Route path="/StartContest" element={<StartContest />} />

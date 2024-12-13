@@ -1,6 +1,6 @@
 // src/Count.js
 import React, { useEffect, useState } from 'react';
-import { getCount } from './api';
+import { getCount } from '../../../../api';
 
 const Count = () => {
     const [count, setCount] = useState(0);

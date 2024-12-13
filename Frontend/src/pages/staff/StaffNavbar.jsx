@@ -15,6 +15,10 @@ import SearchIcon from "@mui/icons-material/Search";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import EmailIcon from '@mui/icons-material/Email';
+
+import logo from "../../assets/snsihub.png"
+
+
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
@@ -63,67 +67,29 @@ const StaffNavbar = () => {
   };
 
   return (
-    <AppBar position="static" className="bg-yellow-50" color="" elevation={0}>
-      <Toolbar className="flex justify-between px-6 bg-yellow-50 shadow-md">
-        {/* Left: Logo and Title */}
-        <Box className="flex items-center">
-          <Typography
-            variant="h6"
-            className="font-bold text-yellow-600 mr-4 cursor-pointer"
-          >
-            
-          </Typography>
-          <Typography
-            variant="subtitle1"
-            className="text-gray-700 hidden sm:block"
-          >
-            SNS Groups
-          </Typography>
-        </Box>
-
-        {/* Center: Search */}
-        
-
-        {/* Right: Profile Menu */}
-        <Box display="flex" alignItems="center">
-          <IconButton>
-            <EmailIcon fontSize="medium" className="text-gray-700" />
-          </IconButton>
-
-          <IconButton onClick={handleMenuOpen}>
-            <Avatar
-              sx={{ bgcolor: "#F59E0B", width: 40, height: 40 }}
-              alt="Profile"
-              className="cursor-pointer"
-            >
-              P
-            </Avatar>
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "right",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-          >
-            <MenuItem onClick={handleMenuClose}>
-              <SettingsIcon fontSize="small" className="mr-2 text-gray-700" />
-              <Typography className="text-gray-900">Settings</Typography>
-            </MenuItem>
-            <MenuItem onClick={handleLogout}>
-              <LogoutIcon fontSize="small" className="mr-2 text-red-500" />
-              <Typography color="error">Logout</Typography>
-            </MenuItem>
-          </Menu>
-        </Box>
-      </Toolbar>
-    </AppBar>
+    <>
+        <div className={`flex bg-gradient-to-r from-[#00296B] to-[#0077B6] ${window.location.pathname === '/staff/students' || window.location.pathname === '/staffdashboard' ? 'rounded-t-2xl' : 'rounded-2xl'} p-4 mt-3 mx-3 justify-between items-center`}>
+            <div className="flex items-center gap-8">
+              <img src={logo} alt="Logo" className="h-10" />
+              
+            </div>
+            <div className="flex items-center gap-8">
+              <nav className="flex gap-6 text-white">
+                <a href="#" className="font-medium">Home</a>
+                <a href="#" className="font-medium">Student</a>
+                <a href="#" className="font-medium">Library</a>
+              </nav>
+            </div>
+            <div className="flex items-center gap-4 text-white">
+              <button className="p-2"><SearchIcon /></button>
+              <button className="p-2"><EmailIcon /></button>
+              <div className="flex items-center mr-2 gap-2">
+                {/* <img src="/avatar.png" alt="User" className="h-8 w-8 rounded-full" /> */}
+                <span>Herbert</span>
+              </div>
+            </div>
+          </div>
+    </>
   );
 };
 

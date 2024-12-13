@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import TestCaseSelection from '../../../components/TestCaseSelection';
-import ProblemDetails from '../../../components/ProblemDetails';
-import ExampleTestCase from '../../../components/ExampleTestCase';
-import CodeEditor from '../../../components/CodeEditor';
-import Buttons from '../../../components/Buttons';
-import TestcaseResults from '../../../components/TestcaseResults';
+import TestCaseSelection from '../../../components/staff/coding/TestCaseSelection';
+import ProblemDetails from '../../../components/staff/coding/ProblemDetails';
+import ExampleTestCase from '../../../components/staff/coding/ExampleTestCase';
+import CodeEditor from '../../../components/staff/coding/CodeEditor';
+import Buttons from '../../../components/staff/coding/Buttons';
+import TestcaseResults from '../../../components/staff/coding/TestcaseResults';
 
 function ContestPage() {
   const { testId } = useParams(); // Get testId from URL parameters
