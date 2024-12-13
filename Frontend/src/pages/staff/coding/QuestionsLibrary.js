@@ -1,4 +1,3 @@
-// QuestionsLibrary.js
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -19,6 +18,7 @@ import {
   InputLabel,
   Drawer,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const QuestionsLibrary = () => {
@@ -71,6 +71,7 @@ const QuestionsLibrary = () => {
     setSelectedQuestions((prev) =>
       prev.includes(id) ? prev.filter((qid) => qid !== id) : [...prev, id]
     );
+    console.log("Selected Questions:", selectedQuestions);
   };
 
   const handleViewDetails = (id) => {
@@ -100,12 +101,29 @@ const QuestionsLibrary = () => {
     }
   };
 
+  const navigate = useNavigate();
+
+  const handleNext = () => {
+    const selectedQuestionsData = questions.filter((q) =>
+      selectedQuestions.includes(q.id)
+    );
+    // Store selected questions in sessionStorage
+    sessionStorage.setItem("selectedQuestions", JSON.stringify(selectedQuestionsData));
+
+    // Navigate to the preview page
+    navigate("/question-preview");
+  };
+
   if (loading) {
     return <Typography align="center">Loading questions...</Typography>;
   }
 
   if (error) {
-    return <Typography align="center" color="error">{error}</Typography>;
+    return (
+      <Typography align="center" color="error">
+        {error}
+      </Typography>
+    );
   }
 
   return (
@@ -228,10 +246,10 @@ const QuestionsLibrary = () => {
           <Button
             variant="contained"
             color="secondary"
-            onClick={handlePublish}
+            onClick={handleNext}
             disabled={selectedQuestions.length === 0}
           >
-            Publish Selected Questions
+            Next
           </Button>
         </Box>
       </Box>
