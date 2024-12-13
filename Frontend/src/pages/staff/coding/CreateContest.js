@@ -1,229 +1,239 @@
-// src/pages/CreateContest.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
-function CreateContest() {
-  const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    contestName: '',
-    startDate: '',
-    startTime: '',
-    endDate: '',
-    endTime: '',
-    noEndTime: false,
-    organizationType: '',
-    organizationName: '',
-    TestType: '',
-  });
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
+const CreateContest = () => {
+    const [contestData, setContestData] = useState({
+        assessmentName: '',
+        startDate: '',
+        startTime: '',
+        endDate: '',
+        endTime: '',
+        noEndTime: false,
+        guidelines: [''],
     });
-  };
 
-  // Function to generate a unique contest ID
-  const generateContestId = () => {
-    return 'contest_' + Date.now() + Math.random().toString(36).substring(2, 8);
-  };
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setContestData({
+            ...contestData,
+            [name]: type === 'checkbox' ? checked : value
+        });
+    };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    try {
-      const startDateTime = `${formData.startDate}T${formData.startTime}`;
-      const endDateTime = formData.noEndTime ? null : `${formData.endDate}T${formData.endTime}`;
-      
-      // Create a unique contest_id (could use a library like uuid or generate with the backend)
-      const contestId = `${Math.random().toString(36).substr(2, 9)}`; // simple random ID
-  
-      // Send data to backend
-      const response = await axios.post('http://localhost:8000/contestdetails/', {
-        contest_id: contestId, // Include contest_id in the request
-        contest_name: formData.contestName,
-        start_time: startDateTime,
-        end_time: endDateTime,
-        organization_type: formData.organizationType,
-        organization_name: formData.organizationName,
-        ContestType: formData.TestType,
-      });
-  
-      // Display success toast message
-      toast.success('Test Published successfully!', {
-        position: "top-right",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-  
-      // Delay navigation to allow toast to display
-      setTimeout(() => {
-        // Navigate based on TestType selection, with contest ID in the URL
-        if (formData.TestType === "Auto") {
-          navigate(`/HrUpload/${contestId}`);
-        } else if (formData.TestType === "Manual") {
-          navigate(`/ManualPage/${contestId}`);
+    // Usage in the frontend when you receive the contestId
+
+
+    const handleNext = () => {
+        // Check if the startDate and startTime are set
+        if (!contestData.startDate || !contestData.startTime) {
+            alert('Start date and time must be provided.');
+            return;
         }
-      }, 2000); // 2-second delay to match autoClose duration
-  
-      console.log('API response:', response.data);
-      console.log("Details saved successfully!");
-  
-    } catch (error) {
-      console.error('Error saving contest details:', error);
-  
-      // Display error toast message
-      toast.error('There was an error saving the contest details. Please try again.', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    }
-  };
-  
 
-  return (
-    <div className="container mx-auto p-4 max-w-lg">
-      <div className="bg-white shadow p-6 rounded-lg">
-        <h1 className="text-3xl font-bold mb-4">Create Contest</h1>
-        <p className="text-gray-600 mb-6">
-          Host your own coding contest. Select from available challenges or create your own.
-        </p>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block font-bold mb-2">Contest Name <span className="text-red-500">*</span></label>
-            <input
-              type="text"
-              name="contestName"
-              value={formData.contestName}
-              onChange={handleChange}
-              required
-              className="w-full border p-2 rounded"
-            />
-          </div>
+        // Ensure the endDate and endTime are properly set
+        let startDateTime = `${contestData.startDate}T${contestData.startTime}:00`; // Adding seconds
+        let endDateTime = `${contestData.endDate}T${contestData.endTime}:00`; // Adding seconds
 
-          <div className="mb-4">
-            <label className="block font-bold mb-2">Start Time <span className="text-red-500">*</span></label>
-            <div className="flex gap-4">
-              <input
-                type="date"
-                name="startDate"
-                value={formData.startDate}
-                onChange={handleChange}
-                required
-                className="w-1/2 border p-2 rounded"
-              />
-              <input
-                type="time"
-                name="startTime"
-                value={formData.startTime}
-                onChange={handleChange}
-                required
-                className="w-1/2 border p-2 rounded"
-              />
+        // Handle the case where no end time is set
+        if (contestData.noEndTime) {
+            endDateTime = null; // Or handle it according to your needs
+        }
+
+        // Now proceed to call your API with the correctly formatted date-time
+        const contestPayload = {
+            assessmentName: contestData.assessmentName,
+            startDateTime: startDateTime,
+            endDateTime: endDateTime,
+            guidelines: contestData.guidelines,
+            // add other fields
+        };
+
+        // Perform the API call here
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();  // Prevent default form submission
+
+        const formData = {
+            assessmentName: contestData.assessmentName,  // assessmentName instead of contestName
+            startDate: contestData.startDate, // Should match backend
+            startTime: contestData.startTime, // Should match backend
+            endDate: contestData.endDate,
+            endTime: contestData.endTime,
+            guidelines: contestData.guidelines,  // Sending guidelines data
+        };
+
+        // Validate input data before sending it to backend
+        if (!contestData.assessmentName || !contestData.startDate || !contestData.startTime) {
+            alert('Assessment name, start date, and start time must be provided.');
+            return;
+        }
+
+        // Ensure the endDate and endTime are properly set
+        let startDateTime = `${contestData.startDate}T${contestData.startTime}:00`; // Adding seconds
+        let endDateTime = `${contestData.endDate}T${contestData.endTime}:00`; // Adding seconds
+
+        // Handle the case where no end time is set
+        if (contestData.noEndTime) {
+            endDateTime = null; // Or handle it according to your needs
+        }
+
+        // Prepare the payload
+        const contestPayload = {
+            assessmentName: contestData.assessmentName, // assessmentName in payload
+            startDateTime: startDateTime,
+            endDateTime: endDateTime,
+            guidelines: contestData.guidelines, // guidelines data
+        };
+
+        // Perform the API call to create the contest
+        try {
+            const response = await fetch('http://localhost:8000/api/create-assessment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(contestPayload),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.contestId) {
+                // Redirect to the questions page with the contestId
+                window.location.href = `/Questions/${data.contestId}`; // Assuming the URL is something like /questions/{contestId}
+            } else {
+                alert('Error creating contest: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Something went wrong. Please try again.');
+        }
+    };
+
+    return (
+        <div className="create-contest max-w-10xl mx-auto p-10 bg-white shadow-md rounded-md">
+            <div className="steps flex justify-between mb-6">
+                <span className="font-bold text-blue-600">1. Create Contest</span>
+                <span className="text-gray-400">2. File Upload</span>
             </div>
-          </div>
 
-          <div className="mb-4">
-            <label className="block font-bold mb-2">End Time <span className="text-red-500">*</span></label>
-            <div className="flex gap-4">
-              <input
-                type="date"
-                name="endDate"
-                value={formData.endDate}
-                onChange={handleChange}
-                disabled={formData.noEndTime}
-                className="w-1/2 border p-2 rounded"
-              />
-              <input
-                type="time"
-                name="endTime"
-                value={formData.endTime}
-                onChange={handleChange}
-                disabled={formData.noEndTime}
-                className="w-1/2 border p-2 rounded"
-              />
-            </div>
-            <div className="mt-2">
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  name="noEndTime"
-                  checked={formData.noEndTime}
-                  onChange={handleChange}
-                  className="mr-2"
-                />
-                This contest has no end time.
-              </label>
-            </div>
-          </div>
+            <h2 className="text-3xl font-semibold mb-6">Create Contest</h2>
 
-          <div className="mb-4">
-            <label className="block font-bold mb-2">Organization Type <span className="text-red-500">*</span></label>
-            <select
-              name="organizationType"
-              value={formData.organizationType}
-              onChange={handleChange}
-              required
-              className="w-full border p-2 rounded"
-            >
-              <option value="">Select organization type</option>
-              <option value="School">School</option>
-              <option value="Company">Company</option>
-              <option value="University">University</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="form-group">
+                    <label htmlFor="assessmentName" className="block text-gray-700">Assessment Name</label>
+                    <input
+                        type="text"
+                        id="assessmentName"
+                        name="assessmentName"
+                        value={contestData.assessmentName}
+                        onChange={handleChange}
+                        placeholder="Enter assessment name"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
 
-          <div className="mb-4">
-            <label className="block font-bold mb-2">Organization Name <span className="text-red-500">*</span></label>
-            <input
-              type="text"
-              name="organizationName"
-              value={formData.organizationName}
-              onChange={handleChange}
-              required
-              className="w-full border p-2 rounded"
-            />
-          </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="form-group">
+                        <label htmlFor="startDate" className="block text-gray-700">Start Date</label>
+                        <input
+                            type="date"
+                            id="startDate"
+                            name="startDate"
+                            value={contestData.startDate}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
 
-          <div className="mb-4">
-            <label className="block font-bold mb-2">Select Test Type <span className="text-red-500">*</span></label>
-            <select
-              name="TestType"
-              value={formData.TestType}
-              onChange={handleChange}
-              required
-              className="w-full border p-2 rounded"
-            >
-              <option value="">Select Test type</option>
-              <option value="Manual">Manual</option>
-              <option value="Auto">Auto</option>
-            </select>
-          </div>
+                    <div className="form-group">
+                        <label htmlFor="startTime" className="block text-gray-700">Start Time</label>
+                        <input
+                            type="time"
+                            id="startTime"
+                            name="startTime"
+                            value={contestData.startTime}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
 
-          <button type="submit" className="bg-green-500 text-white w-full p-2 rounded mt-4">
-            Get Started
-          </button>
-        </form>
-      </div>
+                    <div className="form-group">
+                        <label htmlFor="endDate" className="block text-gray-700">End Date</label>
+                        <input
+                            type="date"
+                            id="endDate"
+                            name="endDate"
+                            value={contestData.endDate}
+                            onChange={handleChange}
+                            disabled={contestData.noEndTime}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                        />
+                    </div>
 
-      <ToastContainer />
-    </div>
-  );
-}
+                    <div className="form-group">
+                        <label htmlFor="endTime" className="block text-gray-700">End Time</label>
+                        <input
+                            type="time"
+                            id="endTime"
+                            name="endTime"
+                            value={contestData.endTime}
+                            onChange={handleChange}
+                            disabled={contestData.noEndTime}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                        />
+                    </div>
+                </div>
+
+                <div className="form-group">
+                    <label className="inline-flex items-center">
+                        <input
+                            type="checkbox"
+                            name="noEndTime"
+                            checked={contestData.noEndTime}
+                            onChange={handleChange}
+                            className="form-checkbox text-blue-600"
+                        />
+                        <span className="ml-2 text-gray-700">No End Time</span>
+                    </label>
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="guidelines" className="block text-gray-700">Guidelines</label>
+                    {contestData.guidelines.map((guideline, index) => (
+                        <div key={index}>
+                            <input
+                                type="text"
+                                value={guideline}
+                                onChange={(e) => {
+                                    const newGuidelines = [...contestData.guidelines];
+                                    newGuidelines[index] = e.target.value;
+                                    setContestData({ ...contestData, guidelines: newGuidelines });
+                                }}
+                                placeholder={`Guideline ${index + 1}`}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                    ))}
+                    <button
+                        type="button"
+                        onClick={() => setContestData({ ...contestData, guidelines: [...contestData.guidelines, ''] })}
+                        className="mt-2 text-blue-600"
+                    >
+                        Add Another Guideline
+                    </button>
+                </div>
+
+                <div className="flex justify-end">
+                    <button
+                        type="submit"
+                        className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        Create Contest
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+};
 
 export default CreateContest;
