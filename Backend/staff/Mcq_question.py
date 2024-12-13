@@ -142,10 +142,31 @@ def upload_single_question(request):
     }, status=405)
 
 
+
+
 def fetch_all_questions(request):
     try:
-        # Fetch all questions from MongoDB
-        questions = list(questions_collection.find({}, {"_id": 0}))  # Exclude MongoDB's _id field
+        # Get query parameters for filtering and searching
+        level = request.GET.get('level', '').strip()
+        tags = request.GET.getlist('tags')  # Supports multiple tags as a list
+        search = request.GET.get('search', '').strip()
+
+        # Build the MongoDB query
+        query = {}
+        if level:
+            query['level'] = level
+        if tags:
+            query['tags'] = {'$all': tags}  # Matches all specified tags
+        if search:
+            query['$or'] = [
+                {'question': {'$regex': re.escape(search), '$options': 'i'}},  # Case-insensitive search in question
+                {'tags': {'$regex': re.escape(search), '$options': 'i'}}  # Case-insensitive search in tags
+            ]
+
+        # Fetch filtered data from MongoDB
+        questions = list(questions_collection.find(query, {'_id': 0}))  # Exclude MongoDB's _id field
+        
         return JsonResponse({"questions": questions}, status=200)
+    
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
