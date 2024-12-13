@@ -6,7 +6,7 @@ const Questions = () => {
   const navigate = useNavigate();
 
   const handleNavigateToLibrary = () => {
-    navigate(`/QuestionsLibrary/${contestId}`);
+    navigate(`/${contestId}/QuestionsLibrary`);
   };
 
   return (

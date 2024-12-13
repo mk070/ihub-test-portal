@@ -26,6 +26,8 @@ import Assesment from './pages/staff/coding/Assesment';
 import QuestionsLibrary from './pages/staff/coding/QuestionsLibrary';
 import Questions from './pages/staff/coding/Questions';
 import QuestionPreview from "./pages/staff/coding/QuestionPreview";
+import QuestionDashboard from "./pages/staff/coding/QuestionDashboard";
+import BulkUpload from "./pages/staff/coding/BulkUpload";
 // Layout component for wrapping student routes
 const StudentLayout = () => (
   <>
@@ -74,11 +76,15 @@ function App() {
           <Route path="/ManualPage/:contestId" element={<ManualPage />} />
           <Route path="/CreateContest" element={<CreateContest />} />
 
-          <Route path="/Questions/:contestId" element={<Questions />} />
-          <Route path="/QuestionsLibrary/:contestId" element={<QuestionsLibrary />} />          
+          <Route path="/:contestId/Questions" element={<Questions />} />
+          <Route path="/:contestId/QuestionsLibrary" element={<QuestionsLibrary />} />          
           <Route path="/StartContest" element={<StartContest />} />
           <Route path="/viewcontest/:contestId" element={<ViewContest />} />
-          <Route path="/question-preview" component={QuestionPreview} />
+          <Route path="/:contestId/question-preview" element={<QuestionPreview />} />
+
+          <Route path="/library/coding" element={<QuestionDashboard />} />
+          <Route path="/BulkUpload" element={<BulkUpload />} />
+
         </Route>
         <Route path="/testinstructions/:testId" element={<TestInstructions />} />
         <Route path="/Contest/:testId" element={<ContestPage />} />
