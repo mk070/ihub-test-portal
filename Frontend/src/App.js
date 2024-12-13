@@ -25,6 +25,7 @@ import ViewContest from './pages/staff/coding/ViewContest';
 import Assesment from './pages/staff/coding/Assesment';
 import QuestionsLibrary from './pages/staff/coding/QuestionsLibrary';
 import Questions from './pages/staff/coding/Questions';
+import Mcq from './pages/staff/mcq/Mcq';
 // Layout component for wrapping student routes
 const StudentLayout = () => (
   <>
@@ -72,7 +73,7 @@ function App() {
           <Route path="/OnebyOne" element={<OnebyOne />} />
           <Route path="/ManualPage/:contestId" element={<ManualPage />} />
           <Route path="/CreateContest" element={<CreateContest />} />
-
+          <Route path="/library/Mcq" element={<Mcq/>} />
           <Route path="/Questions/:contestId" element={<Questions />} />
           <Route path="/QuestionsLibrary/:contestId" element={<QuestionsLibrary />} />          
           <Route path="/StartContest" element={<StartContest />} />
