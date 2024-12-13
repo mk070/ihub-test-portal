@@ -8,42 +8,38 @@ import os
 # Update the MongoClient to use the provided connection string
 client = MongoClient("mongodb+srv://ihub:ihub@test-portal.lcgyx.mongodb.net/test_portal_db?retryWrites=true&w=majority")
 db = client["test_portal_db"]  # Ensure this matches the database name in your connection string
-questions_collection = db['Questions_Library']
-temp_questions_collection = db['tempQuestions']
+questions_collection = db['Coding_Questions_Library']
 final_questions_collection = db['finalQuestions']
 
 PROBLEMS_FILE_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'Frontend', 'public', 'json', 'questions.json')
 
 def fetch_Questions(request):
-    """
-    Fetches questions from `tempQuestions`. If `tempQuestions` is empty,
-    it fetches questions from `Questions_Library`, stores them in `tempQuestions`, 
-    and then returns the questions from `tempQuestions`.
-    """
-    # Check if tempQuestions is empty
-    temp_count = questions_collection.count_documents({})
+    try:
+        # Query the MongoDB collection
+        coding_questions = list(questions_collection.find({}, {'_id': 1, 'title': 1, 'level': 1, 'problem_statement': 1}))
+        
+        # Map _id to id (convert ObjectId to string)
+        for question in coding_questions:
+            question['id'] = str(question.pop('_id'))  # Rename `_id` to `id`
+        
+        # Return the questions as a JSON response
+        return JsonResponse({'problems': coding_questions}, status=200)
 
-    # If tempQuestions is empty, populate it from Questions_Library
-    if temp_count == 0:
-        # Fetch questions from Questions_Library
-        documents = questions_collection.find({}, {'problems': 1, '_id': 0})
-        problems = [problem for document in documents for problem in document.get('problems', [])]
+    except PyMongoError as e:
+        # Log the error (optional)
+        print(f"Database error: {e}")
 
-        # Insert fetched data into tempQuestions
-        questions_collection.insert_many([{"problems": problems}])
+        # Return an error response
+        return JsonResponse({'error': 'Failed to fetch questions from the database'}, status=500)
 
-    # Retrieve and return the data from tempQuestions
-    temp_documents = questions_collection.find({}, {'problems': 1, '_id': 0})
-    temp_problems = [problem for document in temp_documents for problem in document.get('problems', [])]
-    
-    return JsonResponse({'problems': temp_problems})
-
-
-from bson import ObjectId
+    except Exception as e:
+        # Catch any other unexpected errors
+        print(f"Unexpected error: {e}")
+        return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
 
 def save_problem_data(new_problem):
     """
-    Adds a new problem to the problems array in tempQuestions. If a document with ObjectId already exists,
+    Adds a new problem to the problems array in Coding_Questions_Library. If a document with ObjectId already exists,
     it appends the new problem to problems; otherwise, it creates a new document.
     """
     try:
@@ -57,7 +53,7 @@ def save_problem_data(new_problem):
             "samples": new_problem.get('samples', []),
             "hidden_samples": new_problem.get('hidden_samples', [])
         }
-        
+
         # Convert the main document ID to ObjectId
         main_document_id = ObjectId('6731ed9e1005131d602865de')
         existing_document = questions_collection.find_one({'_id': main_document_id})
@@ -94,65 +90,55 @@ def save_problem_data(new_problem):
 
 @csrf_exempt
 def publish_questions(request):
-    """
-    Moves questions from tempQuestions to finalQuestions with the contestId and visible_to passed in the request body.
-    Appends to FinalQuestions collection instead of clearing it.
-    """
     if request.method == 'POST':
         try:
-            # Parse JSON data from the request to get contestId and visible_to
             data = json.loads(request.body)
-            contest_id = data.get('contestId')
-            visible_to = data.get('students', [])  # List of selected student regnos
+            selected_questions = data.get('questions', [])
 
-            print("Received contestId:", contest_id)  # Debugging line
-            print("Visible to students:", visible_to)  # Debugging line
+            # Verify that selected_questions is a valid list
+            if not isinstance(selected_questions, list) or not selected_questions:
+                return JsonResponse({'error': 'No questions selected'}, status=400)
 
-            # Check if contest_id is provided
-            if not contest_id:
-                return JsonResponse({'error': 'contestId is missing in the request'}, status=400)
-
-            # Retrieve questions from tempQuestions
-            temp_questions = questions_collection.find({}, {'problems': 1, '_id': 0})
-
-            # Extract problems from all documents in tempQuestions
+            # Process selected questions only
             all_problems = []
-            for document in temp_questions:
-                all_problems.extend(document.get("problems", []))
+            for question in selected_questions:
+                question_data = questions_collection.find_one({"id": question['id']}, {"_id": 0})
+                if question_data:
+                    all_problems.append(question_data)
 
-            # Check if a document with the same contestId already exists
+            # Save to finalQuestions collection
+            contest_id = data.get('contestId', 'default_contest')
+            visible_to = data.get('students', [])
+
             existing_document = final_questions_collection.find_one({"contestId": contest_id})
 
             if existing_document:
-                # Append problems to the existing document
                 final_questions_collection.update_one(
                     {"contestId": contest_id},
                     {'$push': {'problems': {'$each': all_problems}}}
                 )
                 message = 'Questions appended to existing contest!'
             else:
-                # Insert a new document with contestId, problems array, and visible_to
                 final_questions_collection.insert_one({
                     "contestId": contest_id,
                     "problems": all_problems,
-                    "visible_to": visible_to  # Store the list of student regnos
+                    "visible_to": visible_to
                 })
                 message = 'Questions published successfully!'
 
             return JsonResponse({'message': message}, status=200)
 
         except Exception as e:
-            print("Error publishing questions:", str(e))
-            traceback.print_exc()
-            return JsonResponse({'error': 'Failed to publish questions'}, status=500)
+            return JsonResponse({'error': f'Error publishing questions: {str(e)}'}, status=500)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 
 @csrf_exempt
 def modify_problem_data(new_problem):
     """
-    Modifies an existing problem in `tempQuestions` based on its ID.
+    Modifies an existing problem in `Coding_Questions_Library` based on its ID.
     """
     try:
         problem_id = new_problem.get("id")
@@ -160,7 +146,7 @@ def modify_problem_data(new_problem):
             {'problems.id': problem_id},  # Match within the `problems` array by `id`
             {'$set': {'problems.$': new_problem}}  # Update the matched problem
         )
-        
+
         if result.modified_count > 0:
             return JsonResponse({'message': 'Problem modified successfully!'}, status=200)
         else:
@@ -174,7 +160,7 @@ def modify_problem_data(new_problem):
 
 def delete_problem_data(problem_id):
     """
-    Deletes a problem from `tempQuestions` based on its ID within the `problems` array.
+    Deletes a problem from `Coding_Questions_Library` based on its ID within the `problems` array.
     """
     try:
         # Use `$pull` to remove the specific problem from the `problems` array
@@ -197,7 +183,7 @@ def delete_problem_data(problem_id):
 @csrf_exempt
 def save_problem(request):
     """
-    Handles saving, modifying, and deleting problems in `tempQuestions`.
+    Handles saving, modifying, and deleting problems in `Coding_Questions_Library`.
     """
     if request.method == 'GET':
         return fetch_Questions(request)

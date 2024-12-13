@@ -99,7 +99,7 @@ const CreateContest = () => {
 
             if (response.ok && data.contestId) {
                 // Redirect to the questions page with the contestId
-                window.location.href = `/Questions/${data.contestId}`; // Assuming the URL is something like /questions/{contestId}
+                window.location.href = `/${data.contestId}/Questions`; // Assuming the URL is something like /questions/{contestId}
             } else {
                 alert('Error creating contest: ' + data.error);
             }

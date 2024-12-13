@@ -1,7 +1,5 @@
-import pymongo
 import json
 from pymongo import MongoClient
-from bson import ObjectId
 
 # Update the MongoClient to use the provided connection string
 client = MongoClient("mongodb+srv://ihub:ihub@test-portal.lcgyx.mongodb.net/test_portal_db?retryWrites=true&w=majority")
@@ -10,15 +8,11 @@ db = client["test_portal_db"]
 # Select the collection
 questions_collection = db['Questions_Library']
 
-# Load the JSON data
-json_data = """
-{
-    "_id": {
-      "$oid": "672dda1832100ee1f4a69fa1"
-    },
-    "problems": [
-      {
-        "id": 1,
+# Correct JSON string without extra quotes
+problems = """
+[
+  {
+   
         "title": "Sum of Two Numbers",
         "role": [
           "Junior Software Developer",
@@ -60,7 +54,7 @@ json_data = """
         ]
       },
       {
-        "id": 2,
+
         "title": "Reverse a String",
         "role": [
           "Junior Software Developer",
@@ -98,7 +92,6 @@ json_data = """
         ]
       },
       {
-        "id": 3,
         "title": "Find Maximum in List",
         "role": [
           "Junior Software Developer",
@@ -151,7 +144,7 @@ json_data = """
         ]
       },
       {
-        "id": 4,
+   
         "title": "Factorial of a Number",
         "role": [
           "Junior Software Developer",
@@ -189,7 +182,7 @@ json_data = """
         ]
       },
       {
-        "id": 5,
+  
         "title": "Count Vowels in a String",
         "role": "Senior Software Developer",
         "level": "easy",
@@ -224,7 +217,7 @@ json_data = """
         ]
       },
       {
-        "id": 6,
+
         "title": "Check Prime Number",
         "role": [
           "Junior Software Developer",
@@ -262,7 +255,7 @@ json_data = """
         ]
       },
       {
-        "id": 7,
+ 
         "title": "Fibonacci Sequence",
         "role": [
           "Senior Software Developer"
@@ -299,7 +292,7 @@ json_data = """
         ]
       },
       {
-        "id": 8,
+
         "title": "Palindrome Check",
         "role": [
           "AI Developer",
@@ -337,7 +330,7 @@ json_data = """
         ]
       },
       {
-        "id": 9,
+      
         "title": "Sum of Digits",
         "role": [
           "Junior Software Developer",
@@ -375,7 +368,7 @@ json_data = """
         ]
       },
       {
-        "id": 10,
+  
         "title": "Binary to Decimal Conversion",
         "role": [
           "AI Developer",
@@ -413,7 +406,7 @@ json_data = """
         ]
       },
       {
-        "id": 11,
+     
         "title": "Sum of Even Numbers",
         "role": [
           "Junior Software Developer",
@@ -473,7 +466,7 @@ json_data = """
         ]
       },
       {
-        "id": 12,
+   
         "title": "Convert Celsius to Fahrenheit",
         "role": [
           "Junior Software Developer"
@@ -510,7 +503,7 @@ json_data = """
         ]
       },
       {
-        "id": 13,
+   
         "title": "Count Words in Sentence",
         "role": [
           "AI Developer"
@@ -547,7 +540,7 @@ json_data = """
         ]
       },
       {
-        "id": 14,
+   
         "title": "Square Root Calculation",
         "role": [
           "Junior Software Developer",
@@ -585,7 +578,7 @@ json_data = """
         ]
       },
       {
-        "id": 15,
+     
         "title": "String to Uppercase",
         "role": [
           "Junior Software Developer"
@@ -622,7 +615,7 @@ json_data = """
         ]
       },
       {
-        "id": 16,
+
         "title": "Odd Numbers in Range",
         "role": [
           "Junior Software Developer",
@@ -689,7 +682,7 @@ json_data = """
         ]
       },
       {
-        "id": 17,
+   
         "title": "Generate Multiplication Table",
         "role": [
           "AI Developer"
@@ -770,7 +763,7 @@ json_data = """
         ]
       },
       {
-        "id": 18,
+
         "title": "Convert Minutes to Hours and Minutes",
         "role": [
           "Junior Software Developer"
@@ -807,7 +800,7 @@ json_data = """
         ]
       },
       {
-        "id": 19,
+  
         "title": "Merge Two Sorted Lists",
         "role": [
           "Senior Software Developer"
@@ -904,7 +897,7 @@ json_data = """
         ]
       },
       {
-        "id": 20,
+
         "title": "Decimal to Binary Conversion",
         "role": [
           "AI Developer"
@@ -941,7 +934,7 @@ json_data = """
         ]
       },
       {
-        "id": 21,
+       
         "title": "Count Characters in String",
         "role": [
           "Junior Software Developer"
@@ -978,7 +971,7 @@ json_data = """
         ]
       },
       {
-        "id": 22,
+       
         "title": "Check if Palindrome",
         "role": [
           "AI Developer"
@@ -1015,7 +1008,7 @@ json_data = """
         ]
       },
       {
-        "id": 23,
+      
         "title": "Factorial of Number",
         "role": [
           "Junior Software Developer"
@@ -1052,7 +1045,7 @@ json_data = """
         ]
       },
       {
-        "id": 24,
+       
         "title": "Check for Prime Number",
         "role": [
           "Senior Software Developer"
@@ -1089,7 +1082,7 @@ json_data = """
         ]
       },
       {
-        "id": 25,
+        
         "title": "Fibonacci Sequence Generator",
         "role": [
           "Junior Software Developer"
@@ -1152,7 +1145,7 @@ json_data = """
         ]
       },
       {
-        "id": 26,
+       
         "title": "Count Occurrences of Word in Sentence",
         "role": [
           "AI Developer"
@@ -1193,7 +1186,7 @@ json_data = """
         ]
       },
       {
-        "id": 27,
+     
         "title": "Generate n Prime Numbers",
         "role": [
           "Senior Software Developer"
@@ -1260,7 +1253,7 @@ json_data = """
         ]
       },
       {
-        "id": 28,
+      
         "title": "Find GCD of Two Numbers",
         "role": [
           "Senior Software Developer"
@@ -1301,7 +1294,7 @@ json_data = """
         ]
       },
       {
-        "id": 29,
+    
         "title": "Calculate LCM of Two Numbers",
         "role": [
           "Senior Software Developer"
@@ -1378,17 +1371,13 @@ json_data = """
           }
         ]
       }
-    ]
-  }
+]
 """
 
 # Parse the JSON data
-data = json.loads(json_data)
+data = json.loads(problems)
 
-# Convert the $oid to ObjectId
-data["_id"] = ObjectId(data["_id"]["$oid"])
+# Insert multiple documents into the collection
+questions_collection.insert_many(data)
 
-# Insert the document into the collection
-questions_collection.insert_one(data)
-
-print("Document inserted successfully.")
+print("Documents inserted successfully.")

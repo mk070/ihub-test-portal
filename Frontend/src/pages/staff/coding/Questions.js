@@ -17,7 +17,7 @@ const Questions = () => {
       </div>
 
       <h2 className="text-3xl font-semibold mb-6">Questions</h2>
-      <p className="mb-8 text-gray-600">Manage and add questions for contest ID: {contestId}</p>
+      
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div
