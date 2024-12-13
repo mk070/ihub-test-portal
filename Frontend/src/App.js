@@ -24,7 +24,7 @@ import TestInstructions from './pages/student/TestInstruction';
 import ViewContest from './pages/staff/coding/ViewContest';
 import Assesment from './pages/staff/coding/Assesment';
 import QuestionsLibrary from './pages/staff/coding/QuestionsLibrary';
-
+import Questions from './pages/staff/coding/Questions';
 // Layout component for wrapping student routes
 const StudentLayout = () => (
   <>
@@ -64,7 +64,6 @@ function App() {
         <Route element={<StaffLayout />}>
           <Route path="/staffdashboard" element={<Dashboard />} />
           <Route path="/assesment" element={<Assesment />} />
-          <Route path="/questionslibrary" element={<QuestionsLibrary />} />
           <Route path="/coding" element={<ContestDashboard />} />
           <Route path="/SelectTestOption" element={<SelectTestOption />} />
           <Route path="/FileUpload" element={<FileUpload />} />
@@ -73,7 +72,10 @@ function App() {
           <Route path="/OnebyOne" element={<OnebyOne />} />
           <Route path="/ManualPage/:contestId" element={<ManualPage />} />
           <Route path="/CreateContest" element={<CreateContest />} />
-          <Route path="/Questions/:contestId" element={<Questions />} />          <Route path="/StartContest" element={<StartContest />} />
+
+          <Route path="/Questions/:contestId" element={<Questions />} />
+          <Route path="/QuestionsLibrary/:contestId" element={<QuestionsLibrary />} />          
+          <Route path="/StartContest" element={<StartContest />} />
           <Route path="/viewcontest/:contestId" element={<ViewContest />} />
         </Route>
         <Route path="/testinstructions/:testId" element={<TestInstructions />} />

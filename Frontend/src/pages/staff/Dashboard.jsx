@@ -1,106 +1,166 @@
-import { useState } from 'react';
-import { FaCode, FaQuestionCircle, FaComments, FaPlus } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { FaChartBar, FaUsers, FaClipboardList, FaCheckCircle } from 'react-icons/fa';
+import StatsCard from '../../components/staff/StatsCard';
+import TestCard from '../../components/staff/TestCard';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid, Box } from '@mui/material';
+import mcq from '../../assets/mcq.png'
+import code from '../../assets/code.png'
 
-export default function Dashboard() {
-  const navigate = useNavigate();
+function Dashboard() {
+  const stats = [
+    { icon: <FaChartBar size={24} />, title: "Test Created", value: "17" },
+    { icon: <FaUsers size={24} />, title: "No of Students", value: "140" },
+    { icon: <FaClipboardList size={24} />, title: "No of Live test", value: "10" },
+    { icon: <FaCheckCircle size={24} />, title: "No of test completed", value: "5" },
+  ];
 
-  
+  const tests = [
+    {
+      title: "Coding Test",
+      type: "SNSCE",
+      date: "27 Nov 2024",
+      category: "Placement",
+      stats: {
+        Assigned: "120",
+        Register: "60",
+        Completed: "20"
+      },
+      status: "live"
+    },
+    {
+      title: "Aptitude Test",
+      type: "SNSCT",
+      date: "27 Nov 2024",
+      category: "Placement",
+      stats: {
+        Assigned: "120",
+        Register: "60",
+        Completed: "20"
+      },
+      status: "pending"
+    },
+  ];
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleModalOpen = () => setIsModalOpen(true);
+  const handleModalClose = () => setIsModalOpen(false);
 
   return (
-    <div className="min-h-screen bg-yellow-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Assessment Dashboard</h1>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* MCQ Round Card */}
-          <div className="bg-white rounded-2xl shadow-xl border border-yellow-200 p-6 relative">
-            <div className="flex items-center mb-4">
-              <FaQuestionCircle className="h-8 w-8 text-yellow-600 mr-3" />
-              <h2 className="text-xl font-semibold text-gray-900">MCQ Round</h2>
-              <FaPlus 
-                className="h-6 w-6 text-gray-500 absolute top-4 right-4 cursor-pointer"
-                onClick={() => navigate(`/mcq`)}
-              />
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors cursor-pointer">
-                <span className="font-medium">Ongoing</span>
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">3 Active</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors cursor-pointer">
-                <span className="font-medium">Draft</span>
-                <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">2 Saved</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors cursor-pointer">
-                <span className="font-medium">Published</span>
-                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">5 Tests</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Coding Round Card */}
-          <div className="bg-white rounded-2xl shadow-xl border border-yellow-200 p-6 relative">
-            <div className="flex items-center mb-4">
-              <FaCode className="h-8 w-8 text-yellow-600 mr-3" />
-              <h2 className="text-xl font-semibold text-gray-900">Coding Round</h2>
-              <FaPlus 
-                className="h-6 w-6 text-gray-500 absolute top-4 right-4 cursor-pointer"
-                onClick={() => navigate('/coding')}
-              />
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors cursor-pointer">
-                <span className="font-medium">Ongoing</span>
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">2 Active</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors cursor-pointer">
-                <span className="font-medium">Draft</span>
-                <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">1 Saved</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors cursor-pointer">
-                <span className="font-medium">Published</span>
-                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">4 Tests</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Communication Round Card */}
-          <div className="bg-white rounded-2xl shadow-xl border border-yellow-200 p-6 relative">
-            <div className="flex items-center mb-4">
-              <FaComments className="h-8 w-8 text-yellow-600 mr-3" />
-              <h2 className="text-xl font-semibold text-gray-900">Communication Round</h2>
-              <FaPlus 
-                className="h-6 w-6 text-gray-500 absolute top-4 right-4 cursor-pointer"
-                onClick={() => navigate('/communication')}
-              />
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors cursor-pointer">
-                <span className="font-medium">Ongoing</span>
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">1 Active</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors cursor-pointer">
-                <span className="font-medium">Draft</span>
-                <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">3 Saved</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors cursor-pointer">
-                <span className="font-medium">Published</span>
-                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">2 Tests</span>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen   bg-gray-100">
+      <div className="bg-gradient-to-r from-[#00296B] to-[#0077B6] mx-3 rounded-b-2xl p-6 mb-8">
+        <h2 className="text-3xl text-white mb-8 font-bold">Overall Stats</h2>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {stats.map((stat, index) => (
+            <StatsCard key={index} {...stat} />
+          ))}
         </div>
       </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Tabs and Create Test Button */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex gap-4">
+            <button className="px-4 py-2 text-gray-600 hover:text-gray-900">All</button>
+            <button className="px-4 py-2 text-gray-600 hover:text-gray-900">Complete</button>
+            <button className="px-4 py-2 text-gray-600 hover:text-gray-900">Live</button>
+          </div>
+          <button
+            className="px-6 py-2 bg-[#00296B] text-white rounded-lg hover:bg-[#0077B6] transition-colors"
+            onClick={handleModalOpen}
+          >
+            Create Test
+          </button>
+        </div>
+
+        {/* Test Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {tests.map((test, index) => (
+            <TestCard
+              key={index}
+              {...test}
+              onView={() => console.log('View test:', test.title)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Modal for Create Test */}
+      <Dialog open={isModalOpen} onClose={handleModalClose} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <Typography variant="h6" align="center">
+            Select Test Type
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  p: 3,
+                  textAlign: "center",
+                  border: "1px solid #E0E0E0",
+                  borderRadius: "12px",
+                  cursor: "pointer",
+                  "&:hover": { backgroundColor: "#F5F5F5" },
+                }}
+                onClick={() => {
+                  console.log("Skill Assessment selected");
+                  handleModalClose();
+                }}
+              >
+                <img
+                  src={mcq}
+                  alt="Skill Assessment"
+                  style={{ maxWidth: "80px", margin: "0 auto" }}
+                />
+                <Typography variant="h6" mt={2}>
+                  Skill Assessment
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Evaluations to test knowledge and skills across different topics
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  p: 3,
+                  textAlign: "center",
+                  border: "1px solid #E0E0E0",
+                  borderRadius: "12px",
+                  cursor: "pointer",
+                  "&:hover": { backgroundColor: "#F5F5F5" },
+                }}
+                onClick={() => {
+                  console.log("Code Contest selected");
+                  handleModalClose();
+                }}
+              >
+                <img
+                  src={code}
+                  alt="Code Contest"
+                  style={{ maxWidth: "80px", margin: "0 auto" }}
+                />
+                <Typography variant="h6" mt={2}>
+                  Code Contest
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Challenges to assess programming and problem-solving skills
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleModalClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
+
+export default Dashboard;

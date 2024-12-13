@@ -13,7 +13,7 @@ urlpatterns = [
     # path("",include('contest_details.urls')),
     # path("",include('problems.urls')),
     # path("",include('manualProblems.urls')),
-    # path("",include('fetchProblems.urls')),
+    path("",include('staff.urls')),
     path('api/staff/', include('staff.urls')),
     path('api/student/', include('student.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

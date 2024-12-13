@@ -21,7 +21,7 @@ def fetch_Questions(request):
     and then returns the questions from `tempQuestions`.
     """
     # Check if tempQuestions is empty
-    temp_count = temp_questions_collection.count_documents({})
+    temp_count = questions_collection.count_documents({})
 
     # If tempQuestions is empty, populate it from Questions_Library
     if temp_count == 0:
@@ -30,10 +30,10 @@ def fetch_Questions(request):
         problems = [problem for document in documents for problem in document.get('problems', [])]
 
         # Insert fetched data into tempQuestions
-        temp_questions_collection.insert_many([{"problems": problems}])
+        questions_collection.insert_many([{"problems": problems}])
 
     # Retrieve and return the data from tempQuestions
-    temp_documents = temp_questions_collection.find({}, {'problems': 1, '_id': 0})
+    temp_documents = questions_collection.find({}, {'problems': 1, '_id': 0})
     temp_problems = [problem for document in temp_documents for problem in document.get('problems', [])]
     
     return JsonResponse({'problems': temp_problems})
@@ -60,11 +60,11 @@ def save_problem_data(new_problem):
         
         # Convert the main document ID to ObjectId
         main_document_id = ObjectId('6731ed9e1005131d602865de')
-        existing_document = temp_questions_collection.find_one({'_id': main_document_id})
+        existing_document = questions_collection.find_one({'_id': main_document_id})
 
         if existing_document:
             # Append new problem to the problems array
-            result = temp_questions_collection.update_one(
+            result = questions_collection.update_one(
                 {'_id': main_document_id},
                 {'$push': {'problems': problem_data}}
             )
@@ -75,7 +75,7 @@ def save_problem_data(new_problem):
                 "_id": main_document_id,
                 "problems": [problem_data]
             }
-            result = temp_questions_collection.insert_one(new_document)
+            result = questions_collection.insert_one(new_document)
             message = 'New document created and problem added!'
 
         if result:
@@ -113,7 +113,7 @@ def publish_questions(request):
                 return JsonResponse({'error': 'contestId is missing in the request'}, status=400)
 
             # Retrieve questions from tempQuestions
-            temp_questions = temp_questions_collection.find({}, {'problems': 1, '_id': 0})
+            temp_questions = questions_collection.find({}, {'problems': 1, '_id': 0})
 
             # Extract problems from all documents in tempQuestions
             all_problems = []
@@ -156,7 +156,7 @@ def modify_problem_data(new_problem):
     """
     try:
         problem_id = new_problem.get("id")
-        result = temp_questions_collection.update_one(
+        result = questions_collection.update_one(
             {'problems.id': problem_id},  # Match within the `problems` array by `id`
             {'$set': {'problems.$': new_problem}}  # Update the matched problem
         )
@@ -178,7 +178,7 @@ def delete_problem_data(problem_id):
     """
     try:
         # Use `$pull` to remove the specific problem from the `problems` array
-        result = temp_questions_collection.update_one(
+        result = questions_collection.update_one(
             {},  # Assuming there's only one document; otherwise, specify a filter if needed
             {'$pull': {'problems': {'id': problem_id}}}
         )
