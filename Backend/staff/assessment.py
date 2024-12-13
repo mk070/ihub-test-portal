@@ -8,7 +8,7 @@ from bson import ObjectId
 # MongoDB connection
 client = MongoClient('mongodb+srv://ihub:ihub@test-portal.lcgyx.mongodb.net/test_portal_db?retryWrites=true&w=majority')
 db = client['test_portal_db']
-assessments_collection = db['assessments']
+assessments_collection = db['coding_assessments']
 
 # Helper function to convert string to datetime object (for registration dates)
 from datetime import datetime
