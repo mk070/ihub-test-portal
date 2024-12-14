@@ -6,8 +6,8 @@ from django.core.files.storage import FileSystemStorage
 import json 
 
 # MongoDB connection
-client = MongoClient('mongodb+srv://projecthunt:123@projecthunt.ke18j.mongodb.net/')
-db = client['projecthunt']
+client = MongoClient('mongodb+srv://ihub:ihub@test-portal.lcgyx.mongodb.net/test_portal_db?retryWrites=true&w=majority')
+db = client['test_portal_db']
 questions_collection = db['Mcq_Questions_Library']
 
 @csrf_exempt
