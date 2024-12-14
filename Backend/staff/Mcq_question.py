@@ -142,8 +142,6 @@ def upload_single_question(request):
     }, status=405)
 
 
-
-
 def fetch_all_questions(request):
     try:
         # Get query parameters for filtering and searching

@@ -165,7 +165,7 @@ function Dashboard() {
                 '&:hover': { backgroundColor: '#F5F5F5' },
               }}
               onClick={() => {
-                navigate('/CreateContest');
+                navigate('/coding/details');
                 console.log('Code Contest selected');
                 handleModalClose();
               }}

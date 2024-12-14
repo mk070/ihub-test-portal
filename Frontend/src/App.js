@@ -71,7 +71,7 @@ function App() {
         <Route element={<StaffLayout />}>
           <Route path="/staffdashboard" element={<Dashboard />} />
           <Route path="/library" element={<Library />} />
-          <Route path="/assesment" element={<Assesment />} />
+           <Route path="/coding/details" element={<Assesment />} /> {/* coding creation */}
           <Route path="/coding" element={<ContestDashboard />} />
           <Route path="/SelectTestOption" element={<SelectTestOption />} />
           <Route path="/FileUpload" element={<FileUpload />} />

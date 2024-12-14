@@ -122,7 +122,8 @@ const QuestionPreview = () => {
       });
       if (response.status === 200) {
         alert("Questions published successfully!");
-        navigate(`/HrUpload/${contestId}`);
+        sessionStorage.clear(selectedQuestions)
+        navigate(`/staffdashboard`);
       } else {
         alert("Failed to publish questions.");
       }
