@@ -6,8 +6,10 @@ import { Dialog, DialogTitle, DialogContent, IconButton ,DialogActions, Button, 
 import mcq from '../../assets/mcq.png'
 import code from '../../assets/code.png'
 import CloseIcon from '@mui/icons-material/Close';
+import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
+  const navigate = useNavigate();
   const stats = [
     { icon: <FaChartBar size={24} />, title: "Test Created", value: "17" },
     { icon: <FaUsers size={24} />, title: "No of Students", value: "140" },
@@ -163,6 +165,7 @@ function Dashboard() {
                 '&:hover': { backgroundColor: '#F5F5F5' },
               }}
               onClick={() => {
+                navigate('/CreateContest');
                 console.log('Code Contest selected');
                 handleModalClose();
               }}

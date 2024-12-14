@@ -11,15 +11,23 @@ from .utils import *
 
 logger = logging.getLogger(__name__)
 
+JWT_SECRET = 'test'
+JWT_ALGORITHM = "HS256"
 
-def generate_tokens_for_user(user_id):
+def generate_tokens_for_staff(staff_user):
     """
     Generate tokens for authentication. Modify this with JWT implementation if needed.
     """
-    return {
-        "access_token": f"access-{user_id}",
-        "refresh_token": f"refresh-{user_id}"
+    access_payload = {
+        'staff_user': str(staff_user),
+        'exp': datetime.utcnow() + timedelta(minutes=600),  # Access token expiration
+        'iat': datetime.utcnow(),
     }
+
+    # Encode the token
+    token = jwt.encode(access_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    return {'jwt': token}
+
 
 @api_view(["POST"])
 @permission_classes([AllowAny])  # Allow unauthenticated access for login
@@ -45,21 +53,25 @@ def staff_login(request):
         stored_password = staff_user["password"]
         if check_password(password, stored_password):
             # Generate tokens
-            tokens = generate_tokens_for_user(str(staff_user["_id"]))
+            tokens = generate_tokens_for_staff(str(staff_user["_id"]))
 
             # Create response and set secure cookie
             response = Response({
-                "message": "Login successful",
-                "tokens": tokens
+                "messages": "Login successful",
+                "tokens": tokens,
+                "staffId": str(staff_user["_id"]),
+                "name": staff_user["full_name"],
+                "email": staff_user["email"],
+                "department": staff_user["department"],
+                "collegename": staff_user["collegename"]
             })
-            response.set_cookie(
-                key="jwt",
-                value=tokens["access_token"],
-                httponly=True,
-                samesite="Lax",
-                secure=False,  # Set to True if using HTTPS in production
-                max_age=1 * 24 * 60 * 60  # 1 day in seconds
-            )
+            response.set_cookie(key='jwt', 
+                                value=tokens['jwt'], 
+                                httponly=True, 
+                                samesite='Lax', 
+                                secure=False,
+                                max_age= 1 * 24 * 60 * 60  )
+
             return response
 
         return Response({"error": "Invalid email or password"}, status=401)

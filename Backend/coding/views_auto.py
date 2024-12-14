@@ -87,7 +87,6 @@ def save_problem_data(new_problem):
             'error': f'Error saving problem data: {str(e)}'
         }, status=400)
 
-
 @csrf_exempt
 def publish_questions(request):
     if request.method == 'POST':
@@ -132,7 +131,6 @@ def publish_questions(request):
             return JsonResponse({'error': f'Error publishing questions: {str(e)}'}, status=500)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
-
 
 
 @csrf_exempt
