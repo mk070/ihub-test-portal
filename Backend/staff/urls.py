@@ -1,17 +1,20 @@
 from django.urls import path
-from .views import *
-from .assessment import *
-from . import assessment  # Import views from the current app
-
-
+from .views import staff_login, staff_signup  # Replace with actual imports if necessary
+from .assessment import create_assessment
+from .Mcq_question import bulk_upload, upload_single_question, fetch_all_questions
 urlpatterns = [
+    # Authentication
     path("login/", staff_login, name="staff_login"),
     path("signup/", staff_signup, name="staff_signup"),
 
- # path('api/assessment/<str:assessment_id>/', views.get_assessment, name='get_assessment'),
+    # Assessment API
+    path('api/create-assessment/', create_assessment, name='create_assessment'),
 
-    path('api/create-assessment/', assessment.create_assessment, name='create_assessment'),
-    # path("profile/", staff_profile, name="staff_profile"),
-    # path("get_students/", get_students, name="get_students"),
+    #mcq
+    path("api/bulk-upload/", bulk_upload, name="bulk_upload"),
+    path("api/upload-single-question/", upload_single_question, name="upload_single_question"),
+    path("api/fetch-all-questions/", fetch_all_questions, name="fetch_all_questions"),
+
 
 ]
+
