@@ -32,7 +32,7 @@ def generate_tokens_for_student(student_id):
     }
 
     # Encode the token
-    token = jwt.encode(access_payload, 'test', algorithm="HS256")
+    token = jwt.encode(access_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
     return {'jwt': token}
 
 

@@ -25,12 +25,19 @@ export default function Login() {
     setError('');
     
     try {
-      const response = await axios.post('http://localhost:8000/api/staff/login/', formData);
-      localStorage.setItem('staffToken', response.data.token);
+      const response = await axios.post(
+        'http://localhost:8000/api/staff/login/',
+        formData,
+        {
+          withCredentials: true, // Allow sending and storing cookies
+        }
+      );
+      localStorage.setItem('staffToken', response.data.tokens.access_token); // Store token if needed
       navigate('/staffdashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid email or password');
     }
+    
   };
 
   return (
