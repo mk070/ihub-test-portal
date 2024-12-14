@@ -98,6 +98,8 @@ const QuestionPreview = () => {
   };
 
   const handleAddMoreQuestions = () => {
+    // Store the currently selected questions in sessionStorage
+    sessionStorage.setItem("selectedQuestions", JSON.stringify(selectedQuestions));
     navigate(`/${contestId}/QuestionsLibrary`);
   };
 
