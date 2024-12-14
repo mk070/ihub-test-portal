@@ -20,5 +20,7 @@ urlpatterns = [
     path("api/contests/<str:contest_id>/students/", contest_students, name="contest_students"),
     path('questions/', views_user.fetch_Questions, name='questions'),
     path('saveQuestions/', views_user.fetch_and_save_questions, name= 'saveInFrontend'),
+    path('api/bulk-upload/', views_auto.upload_bulk_coding_questions, name='bulk-upload'),
+    path('api/get-coding-questions/', views_auto.fetch_coding_questions, name='get_coding_questions'),
     # path('selected/',views.selectedProblems, name='selected_problems'),
 ]

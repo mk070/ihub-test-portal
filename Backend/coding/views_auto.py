@@ -16,7 +16,7 @@ PROBLEMS_FILE_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'Fronte
 def fetch_Questions(request):
     try:
         # Query the MongoDB collection
-        coding_questions = list(questions_collection.find({}, {'_id': 1, 'title': 1, 'level': 1, 'problem_statement': 1}))
+        coding_questions = list(questions_collection.find({}, {'_id': 1, 'title': 1, 'level': 1, 'problem_statement': 1,'samples':1,'hidden_samples':1}))
         
         # Map _id to id (convert ObjectId to string)
         for question in coding_questions:
@@ -226,3 +226,42 @@ def save_problem(request):
 
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+@csrf_exempt
+def upload_bulk_coding_questions(request):
+    if request.method == "POST":
+        try:
+            # Check if file exists in request
+            uploaded_file = request.FILES.get("file")
+            if not uploaded_file:
+                return JsonResponse({"error": "No file uploaded."}, status=400)
+
+            # Read file content
+            file_content = uploaded_file.read().decode("utf-8")
+            
+            # Parse JSON
+            data = json.loads(file_content)
+            if not isinstance(data, list):  # Expecting a list of coding questions
+                return JsonResponse({"error": "Invalid JSON format. Expected an array."}, status=400)
+
+            # Insert data into MongoDB
+            result = questions_collection.insert_many(data)
+            return JsonResponse({"message": f"Successfully uploaded {len(result.inserted_ids)} coding questions."})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON file."}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
+
+    return JsonResponse({"error": "Invalid request method."}, status=405)
+
+@csrf_exempt
+def fetch_coding_questions(request):
+    try:
+        # Fetch all coding questions from MongoDB
+        questions = list(questions_collection.find({}, {"_id": 0}))  # Exclude MongoDB ObjectId from response
+        
+        # Return questions as JSON
+        return JsonResponse({"questions": questions}, safe=False)
+
+    except Exception as e:
+        return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)

@@ -16,9 +16,9 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Drawer,
+  TablePagination,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
 const QuestionsLibrary = () => {
@@ -29,8 +29,11 @@ const QuestionsLibrary = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [selectedQuestions, setSelectedQuestions] = useState([]);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selectedQuestionDetails, setSelectedQuestionDetails] = useState(null);
+  const { contestId } = useParams();
+
+  // Pagination states
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -52,14 +55,12 @@ const QuestionsLibrary = () => {
   useEffect(() => {
     let filtered = questions;
 
-    // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter((question) =>
         question.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // Filter by difficulty
     if (difficulty) {
       filtered = filtered.filter((question) => question.level === difficulty);
     }
@@ -71,48 +72,26 @@ const QuestionsLibrary = () => {
     setSelectedQuestions((prev) =>
       prev.includes(id) ? prev.filter((qid) => qid !== id) : [...prev, id]
     );
-    console.log("Selected Questions:", selectedQuestions);
   };
-
-  const handleViewDetails = (id) => {
-    const questionDetails = questions.find((q) => q.id === id);
-    setSelectedQuestionDetails(questionDetails);
-    setDrawerOpen(true);
-  };
-
-  const handleDeleteQuestion = (id) => {
-    setSelectedQuestions((prev) => prev.filter((qid) => qid !== id));
-  };
-
-  const handlePublish = async () => {
-    try {
-      const selectedQuestionsData = questions.filter((q) =>
-        selectedQuestions.includes(q.id)
-      );
-
-      await axios.post("http://localhost:8000/publishQuestions/", {
-        questions: selectedQuestionsData,
-      });
-
-      alert("Questions published successfully!");
-    } catch (error) {
-      console.error("Failed to publish questions:", error);
-      alert("Failed to publish questions. Please try again.");
-    }
-  };
-
-  const navigate = useNavigate();
 
   const handleNext = () => {
     const selectedQuestionsData = questions.filter((q) =>
       selectedQuestions.includes(q.id)
     );
-    // Store selected questions in sessionStorage
     sessionStorage.setItem("selectedQuestions", JSON.stringify(selectedQuestionsData));
-
-    // Navigate to the preview page
-    navigate("/question-preview");
+    navigate(`/${contestId}/question-preview`);
   };
+
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const navigate = useNavigate();
 
   if (loading) {
     return <Typography align="center">Loading questions...</Typography>;
@@ -128,21 +107,18 @@ const QuestionsLibrary = () => {
 
   return (
     <Box p={4} display="flex">
-      {/* Main Question Library */}
+      {/* Main Library Section */}
       <Box flex={2} pr={2}>
         <Typography variant="h4" align="center" gutterBottom>
           Question Library
         </Typography>
-
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
           <TextField
             label="Search"
             variant="outlined"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ flex: 1, marginRight: "1rem" }}
           />
-
           <FormControl variant="outlined" style={{ minWidth: 200 }}>
             <InputLabel id="difficulty-label">Difficulty</InputLabel>
             <Select
@@ -160,7 +136,6 @@ const QuestionsLibrary = () => {
             </Select>
           </FormControl>
         </Box>
-
         {filteredQuestions.length === 0 ? (
           <Typography align="center">No questions available in the library.</Typography>
         ) : (
@@ -168,46 +143,45 @@ const QuestionsLibrary = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell padding="checkbox">Select</TableCell>
+                  <TableCell>Select</TableCell>
                   <TableCell>Title</TableCell>
                   <TableCell>Description</TableCell>
-                  <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredQuestions.map((question) => (
-                  <TableRow key={question.id} hover>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={selectedQuestions.includes(question.id)}
-                        onChange={() => handleSelectQuestion(question.id)}
-                      />
-                    </TableCell>
-                    <TableCell>{question.title}</TableCell>
-                    <TableCell>{question.problem_statement}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        onClick={() => handleViewDetails(question.id)}
-                      >
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filteredQuestions
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((question) => (
+                    <TableRow key={question.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedQuestions.includes(question.id)}
+                          onChange={() => handleSelectQuestion(question.id)}
+                        />
+                      </TableCell>
+                      <TableCell>{question.title}</TableCell>
+                      <TableCell>{question.problem_statement}</TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
+            <TablePagination
+              component="div"
+              count={filteredQuestions.length}
+              page={page}
+              onPageChange={handlePageChange}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleRowsPerPageChange}
+            />
           </TableContainer>
         )}
       </Box>
 
-      {/* Selected Questions Drawer */}
+      {/* Selected Questions Section */}
       <Box flex={1} pl={2}>
         <Typography variant="h5" gutterBottom>
           Selected Questions
         </Typography>
-
         {selectedQuestions.length === 0 ? (
           <Typography align="center">No questions selected.</Typography>
         ) : (
@@ -216,24 +190,14 @@ const QuestionsLibrary = () => {
               <TableHead>
                 <TableRow>
                   <TableCell>Title</TableCell>
-                  <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {selectedQuestions.map((id) => {
                   const question = questions.find((q) => q.id === id);
                   return (
-                    <TableRow key={id} hover>
+                    <TableRow key={id}>
                       <TableCell>{question?.title}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="outlined"
-                          color="secondary"
-                          onClick={() => handleDeleteQuestion(id)}
-                        >
-                          Delete
-                        </Button>
-                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -241,11 +205,10 @@ const QuestionsLibrary = () => {
             </Table>
           </TableContainer>
         )}
-
         <Box display="flex" justifyContent="center" mt={4}>
           <Button
             variant="contained"
-            color="secondary"
+            color="primary"
             onClick={handleNext}
             disabled={selectedQuestions.length === 0}
           >
@@ -253,31 +216,6 @@ const QuestionsLibrary = () => {
           </Button>
         </Box>
       </Box>
-
-      {/* Drawer for Viewing Details */}
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-      >
-        <Box p={4} width={400}>
-          {selectedQuestionDetails ? (
-            <>
-              <Typography variant="h5" gutterBottom>
-                {selectedQuestionDetails.title}
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                {selectedQuestionDetails.problem_statement}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Difficulty: {selectedQuestionDetails.level}
-              </Typography>
-            </>
-          ) : (
-            <Typography>No question details available.</Typography>
-          )}
-        </Box>
-      </Drawer>
     </Box>
   );
 };
