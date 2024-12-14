@@ -7,8 +7,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import mcq from '../../assets/mcq.png';
 import code from '../../assets/code.png';
 import api from '../../axiosConfig';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     created: 0,
     students: 0,
@@ -72,6 +74,7 @@ const Dashboard = () => {
           {tests.map((test) => (
             <TestCard
               key={test._id}
+              contestId={test._id}
               title={test.assessmentName}
               type={test.type || 'General'}
               date={test.startDate ? new Date(test.startDate).toLocaleDateString() : 'N/A'}
@@ -90,97 +93,100 @@ const Dashboard = () => {
 
       {/* Modal for Create Test */}
       <Dialog
-      open={isModalOpen}
-      onClose={handleModalClose}
-      maxWidth="sm"
-      fullWidth
-      sx={{
-        '& .MuiDialog-paper': {
-          borderRadius: '16px',
-          padding: '16px',
-          position: 'relative',
-        },
-      }}
-    >
-      <DialogTitle>
-        <Typography variant="h6" align="center" fontWeight="bold">
-          Select Test Type
-        </Typography>
-        <IconButton
-          aria-label="close"
-          onClick={handleModalClose}
-          sx={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent>
-        <Grid container spacing={3} sx={{ mt: 2 }}>
-          <Grid item xs={6}>
-            <Box
-              sx={{
-                p: 3,
-                textAlign: 'center',
-                height:'230px',
-                border: '1px solid #E0E0E0',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                transition: 'background-color 0.3s',
-                '&:hover': { backgroundColor: '#F5F5F5' },
-              }}
-              onClick={() => {
-                console.log('Skill Assessment selected');
-                handleModalClose();
-              }}
-            >
-              <img
-                src={mcq} // Replace with the actual image URL
-                alt="Skill Assessment"
-                style={{ maxWidth: '80px', margin: '0 auto' }}
-              />
-              <Typography variant="h6" mt={2}>
-                Skill Assessment
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Evaluations to test knowledge and skills across different topics
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box
-              sx={{
-                p: 3,
-                height:'230px',
-                textAlign: 'center',
-                border: '1px solid #E0E0E0',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                transition: 'background-color 0.3s',
-                '&:hover': { backgroundColor: '#F5F5F5' },
-              }}
-              onClick={() => {
-                navigate('/coding/details');
-                console.log('Code Contest selected');
-                handleModalClose();
-              }}
-            >
-              <img
-                src={code} // Replace with the actual image URL
-                alt="Code Contest"
-                style={{ maxWidth: '80px', margin: '0 auto' }}
-              />
-              <Typography variant="h6" mt={2}>
-                Code Contest
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Challenges to assess programming and problem-solving skills
-              </Typography>
-            </Box>
+        open={isModalOpen}
+        onClose={handleModalClose}
+        maxWidth="sm"
+        fullWidth
+        sx={{
+          '& .MuiDialog-paper': {
+            borderRadius: '16px',
+            padding: '16px',
+            position: 'relative',
+          },
+        }}
+      >
+        <DialogTitle>
+          <Typography variant="h6" align="center" fontWeight="bold">
+            Select Test Type
+          </Typography>
+          <IconButton
+            aria-label="close"
+            onClick={handleModalClose}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={3} sx={{ mt: 2 }}>
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  p: 3,
+                  textAlign: 'center',
+                  height: '230px',
+                  border: '1px solid #E0E0E0',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s',
+                  '&:hover': { backgroundColor: '#F5F5F5' },
+                }}
+                onClick={() => {
+                  console.log('Skill Assessment selected');
+                  navigate('/coding/details');
+                  handleModalClose();
+                }}
+              >
+                <img
+                  src={mcq}
+                  alt="Skill Assessment"
+                  style={{ maxWidth: '80px', margin: '0 auto' }}
+                />
+                <Typography variant="h6" mt={2}>
+                  Skill Assessment
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Evaluations to test knowledge and skills across different topics
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  p: 3,
+                  height: '230px',
+                  textAlign: 'center',
+                  border: '1px solid #E0E0E0',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s',
+                  '&:hover': { backgroundColor: '#F5F5F5' },
+                }}
+                onClick={() => {
+                  console.log('Code Contest selected');
+                  navigate('/coding/details');
+
+                  handleModalClose();
+                }}
+              >
+                <img
+                  src={code}
+                  alt="Code Contest"
+                  style={{ maxWidth: '80px', margin: '0 auto' }}
+                />
+                <Typography variant="h6" mt={2}>
+                  Code Contest
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Challenges to assess programming and problem-solving skills
+                </Typography>
+              </Box>
+            </Grid>
           </Grid>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center', mt: 2 }}>
