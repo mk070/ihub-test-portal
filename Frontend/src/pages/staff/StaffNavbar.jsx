@@ -76,7 +76,7 @@ const StaffNavbar = () => {
             <div className="flex items-center gap-8">
               <nav className="flex gap-6 text-white">
                 <a href="#" className="font-medium">Home</a>
-                <a href="#" className="font-medium">Student</a>
+                <a href="/staffstudentprofile/" className="font-medium">Student</a>
                 <a href="#" className="font-medium">Library</a>
               </nav>
             </div>

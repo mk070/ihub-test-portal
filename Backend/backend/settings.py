@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "staff",  # Add your app here
     'rest_framework',
     'django_extensions',
+    'student',
 ]
 CSRF_COOKIE_SECURE = False
 
