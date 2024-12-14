@@ -30,3 +30,5 @@ class MongoDBConnection:
 # Collections
 staff_collection = MongoDBConnection.get_collection("staff")
 student_collection = MongoDBConnection.get_collection("students")
+contest_details_collection = MongoDBConnection.get_collection("Contest_Details")
+coding_assessments_collection = MongoDBConnection.get_collection("coding_assessments")

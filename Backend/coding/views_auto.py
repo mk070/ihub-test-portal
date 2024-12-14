@@ -4,12 +4,14 @@ import json
 import traceback
 from pymongo import MongoClient
 import os
+from bson.objectid import ObjectId
 
 # Update the MongoClient to use the provided connection string
 client = MongoClient("mongodb+srv://ihub:ihub@test-portal.lcgyx.mongodb.net/test_portal_db?retryWrites=true&w=majority")
 db = client["test_portal_db"]  # Ensure this matches the database name in your connection string
 questions_collection = db['Coding_Questions_Library']
 final_questions_collection = db['finalQuestions']
+coding_assessments_collection = db['coding_assessments']
 
 PROBLEMS_FILE_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'Frontend', 'public', 'json', 'questions.json')
 
@@ -92,43 +94,46 @@ def publish_questions(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+            contest_id = data.get('contestId')
+            print("contest_id: ",contest_id)
             selected_questions = data.get('questions', [])
+            selected_students = data.get('students', [])
 
-            # Verify that selected_questions is a valid list
+            # Validate input
+            if not contest_id:
+                return JsonResponse({'error': 'Contest ID is required'}, status=400)
             if not isinstance(selected_questions, list) or not selected_questions:
                 return JsonResponse({'error': 'No questions selected'}, status=400)
+            if not isinstance(selected_students, list) or not selected_students:
+                return JsonResponse({'error': 'No students selected'}, status=400)
 
-            # Process selected questions only
+            # Fetch selected questions' data
             all_problems = []
-            for question in selected_questions:
-                question_data = questions_collection.find_one({"id": question['id']}, {"_id": 0})
+            for question_id in selected_questions:
+                question_data = questions_collection.find_one({"_id": ObjectId(question_id)}, {"_id": 0})
                 if question_data:
                     all_problems.append(question_data)
 
-            # Save to finalQuestions collection
-            contest_id = data.get('contestId', 'default_contest')
-            visible_to = data.get('students', [])
+            # Check if the contest document exists
+            existing_document = coding_assessments_collection.find_one({"contestId": contest_id})
+            if not existing_document:
+                return JsonResponse({'error': 'Contest not found'}, status=404)
 
-            existing_document = final_questions_collection.find_one({"contestId": contest_id})
+            # Append questions and students to the existing document
+            coding_assessments_collection.update_one(
+                {"contestId": contest_id},
+                {
+                    '$addToSet': {
+                        'problems': {'$each': all_problems},  # Append new questions
+                        'visible_to': {'$each': selected_students},  # Append new students
+                    }
+                }
+            )
 
-            if existing_document:
-                final_questions_collection.update_one(
-                    {"contestId": contest_id},
-                    {'$push': {'problems': {'$each': all_problems}}}
-                )
-                message = 'Questions appended to existing contest!'
-            else:
-                final_questions_collection.insert_one({
-                    "contestId": contest_id,
-                    "problems": all_problems,
-                    "visible_to": visible_to
-                })
-                message = 'Questions published successfully!'
-
-            return JsonResponse({'message': message}, status=200)
+            return JsonResponse({'message': 'Questions and students appended successfully!'}, status=200)
 
         except Exception as e:
-            return JsonResponse({'error': f'Error publishing questions: {str(e)}'}, status=500)
+            return JsonResponse({'error': f'Error appending questions and students: {str(e)}'}, status=500)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
@@ -226,6 +231,8 @@ def save_problem(request):
 
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
 @csrf_exempt
 def upload_bulk_coding_questions(request):
     if request.method == "POST":
