@@ -78,6 +78,20 @@ const StaffNavbar = () => {
                 <a href="#" className="font-medium">Home</a>
                 <a href="/staffstudentprofile/" className="font-medium">Student</a>
                 <a href="#" className="font-medium">Library</a>
+
+
+                <Link to="/staffdashboard" className="font-medium text-white hover:text-yellow-500">
+                    Home
+                </Link>
+                <Link to="/students" className="font-medium text-white hover:text-yellow-500">
+                   Student
+                </Link>
+                <Link to="/library" className="font-medium  text-white hover:text-yellow-500">
+                  Library
+                </Link>
+                <a href="#" className="font-medium"></a>
+                <a href="/" className="font-medium"></a>
+
               </nav>
             </div>
             <div className="flex items-center gap-4 text-white">

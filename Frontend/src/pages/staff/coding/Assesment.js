@@ -11,11 +11,9 @@ const SinglePageStepper = () => {
             description: "",
             registrationStart: "",
             registrationEnd: "",
-            maxRegistrations: "",
             guidelines: "",
         },
         testConfiguration: {
-            sections: "",
             questions: "",
             duration: "",
             fullScreenMode: false,
@@ -23,9 +21,6 @@ const SinglePageStepper = () => {
             deviceRestriction: false,
             noiseDetection: false,
             passPercentage: "",
-        },
-        sectionDetails: {
-            sectionTitles: [],
         },
     });
 
@@ -38,10 +33,10 @@ const SinglePageStepper = () => {
             const { sections, questions, duration, passPercentage } = formData.testConfiguration;
             return sections && questions && duration && passPercentage;
         }
-        if (currentStep === 3) {
-            const { sectionTitles } = formData.sectionDetails;
-            return sectionTitles.length > 0; // Ensure at least one section title is provided
-        }
+        // if (currentStep === 3) {
+        //     const { sectionTitles } = formData.sectionDetails;
+        //     return sectionTitles.length > 0; // Ensure at least one section title is provided
+        // }
         return true; // Default to true for safety
     };
 
@@ -96,7 +91,7 @@ const SinglePageStepper = () => {
     //     }
     // };
     const nextStep = () => {
-        if (currentStep < 3) setCurrentStep((prev) => prev + 1);
+        if (currentStep < 2) setCurrentStep((prev) => prev + 1);
       };
     
 
@@ -105,35 +100,34 @@ const SinglePageStepper = () => {
         if (currentStep > 1) setCurrentStep((prev) => prev - 1);
     };
 
-    // Handle final submission
-    const handleFinalSubmit = () => {
-        console.log("Final Form Data:", formData);
-        alert("Form Submitted! Check the console for data.");
-    };
 
-    const generateContestId = () => {
-        return Math.random().toString(36).substr(2, 9); // Generates a random alphanumeric string
-    };
+    // const generateContestId = () => {
+    //     return Math.random().toString(36).substr(2, 9); // Generates a random alphanumeric string
+    // };
     
-    const saveDataToMongoDB = async () => {
-        const contestId = generateContestId(); // Generate contestId
+    const handleFinalSubmit = async () => {
+        // const contestId = generateContestId(); // Generate contestId
         const payload = {
-            contestId, // Add contestId to the payload
+            // contestId, // Add contestId to the payload
             assessmentOverview: formData.assessmentOverview,
             testConfiguration: formData.testConfiguration,
         };
     
         try {
-            const response = await fetch("http://localhost:8000/api/save-data", {
+            const response = await fetch("http://localhost:8000/api/create-assessment/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(payload),
             });
+
+            const data = await response.json();
     
-            if (response.ok) {
-                console.log("Data saved successfully with Contest ID:", contestId);
+            if (response.ok && data.assessmentId) {
+                console.log("Data saved successfully with Contest ID:", data);
+                alert("Form Submitted! Check the console for data.");
+                window.location.href = `/${data.assessmentId}/Questions`; // Assuming the URL is something like /questions/{contestId}
                 // Optionally store contestId in local state or pass it along
             } else {
                 console.error("Failed to save data");
@@ -148,7 +142,7 @@ const SinglePageStepper = () => {
         <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10">
             {/* Stepper */}
             <div className="flex justify-between items-center w-full max-w-4xl mb-8">
-                {["Assessment Overview", "Test Configuration", "Section Details"].map(
+                {["Assessment Overview", "Test Configuration"].map(
                     (step, index) => (
                         <div key={index} className="flex flex-col items-center w-1/3">
                             <div
@@ -233,7 +227,7 @@ const SinglePageStepper = () => {
                                 />
                             </div>
 
-                            {/* Number of Registrations Allowed */}
+                            {/* Number of Registrations Allowed
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Number of Registrations Allowed</label>
                                 <input
@@ -245,7 +239,7 @@ const SinglePageStepper = () => {
                                     placeholder="Enter the maximum number of registrations"
                                     required
                                 />
-                            </div>
+                            </div> */}
 
                             {/* Guidelines */}
                             <div>
@@ -270,7 +264,7 @@ const SinglePageStepper = () => {
                         <h2 className="text-xl font-bold mb-4">Test Configuration</h2>
                         {/* Form */}
                         <form onSubmit={handleSubmit} className="space-y-8">
-                            {/* Number of Sections */}
+                            {/* Number of Sections
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Number of Sections
@@ -285,7 +279,7 @@ const SinglePageStepper = () => {
                                     required
                                 />
 
-                            </div>
+                            </div> */}
 
                             {/* Number of Questions */}
                             <div>
@@ -434,7 +428,7 @@ const SinglePageStepper = () => {
                     </div>
                 )}
 
-        {currentStep === 3 && (
+        {/* {currentStep === 3 && (
             
         <div className="bg-gray-50 p-6 rounded-lg shadow-md">
           <h3 className="text-2xl font-semibold text-gray-800 mb-4">
@@ -460,7 +454,7 @@ const SinglePageStepper = () => {
           </div>
         </div>
        
-      )}
+      )} */}
             </div>
 
             {/* Navigation Buttons */}
@@ -473,7 +467,7 @@ const SinglePageStepper = () => {
                         Previous
                     </button>
                 )}
-                {currentStep < 3 && (
+                {currentStep < 2 && (
                     <button
                         onClick={nextStep}
                         className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow hover:bg-indigo-700"
@@ -481,7 +475,7 @@ const SinglePageStepper = () => {
                         Next
                     </button>
                 )}
-                {currentStep === 3 && (
+                {currentStep === 2 && (
                     <button
                         onClick={handleFinalSubmit}
                         className="px-6 py-2 bg-green-600 text-white font-semibold rounded-md shadow hover:bg-green-700"
