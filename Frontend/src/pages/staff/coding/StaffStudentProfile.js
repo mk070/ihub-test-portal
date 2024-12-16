@@ -10,7 +10,7 @@ const App = () => {
 
   useEffect(() => {
     // Fetch student data (replace with your API endpoint)
-    fetch("http://127.0.0.1:8000/studentprofile")
+    fetch("http://127.0.0.1:8000/studentprofile/")
       .then((response) => response.json())
       .then((data) => setStudents(data.students))
       .catch((error) => console.error("Error fetching data:", error));
