@@ -98,6 +98,8 @@ const QuestionPreview = () => {
   };
 
   const handleAddMoreQuestions = () => {
+    // Store the currently selected questions in sessionStorage
+    sessionStorage.setItem("selectedQuestions", JSON.stringify(selectedQuestions));
     navigate(`/${contestId}/QuestionsLibrary`);
   };
 
@@ -120,7 +122,8 @@ const QuestionPreview = () => {
       });
       if (response.status === 200) {
         alert("Questions published successfully!");
-        navigate(`/HrUpload/${contestId}`);
+        sessionStorage.clear(selectedQuestions)
+        navigate(`/staffdashboard`);
       } else {
         alert("Failed to publish questions.");
       }

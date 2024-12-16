@@ -41,6 +41,13 @@ const QuestionsLibrary = () => {
         const response = await axios.get("http://localhost:8000/manualProblems/");
         setQuestions(response.data.problems);
         setFilteredQuestions(response.data.problems);
+  
+        // Load previously selected questions from sessionStorage
+        const storedQuestions = sessionStorage.getItem("selectedQuestions");
+        if (storedQuestions) {
+          const parsedStoredQuestions = JSON.parse(storedQuestions);
+          setSelectedQuestions(parsedStoredQuestions.map((q) => q.id));
+        }
       } catch (err) {
         console.error("Failed to fetch questions:", err);
         setError("Failed to load questions. Please try again.");
@@ -48,9 +55,10 @@ const QuestionsLibrary = () => {
         setLoading(false);
       }
     };
-
+  
     fetchQuestions();
   }, []);
+  
 
   useEffect(() => {
     let filtered = questions;
@@ -75,10 +83,21 @@ const QuestionsLibrary = () => {
   };
 
   const handleNext = () => {
-    const selectedQuestionsData = questions.filter((q) =>
-      selectedQuestions.includes(q.id)
+    const storedQuestions = sessionStorage.getItem("selectedQuestions");
+    const previousSelectedQuestions = storedQuestions ? JSON.parse(storedQuestions) : [];
+  
+    // Combine previously selected and newly selected questions
+    const allSelectedQuestions = [
+      ...previousSelectedQuestions,
+      ...questions.filter((q) => selectedQuestions.includes(q.id)),
+    ];
+  
+    // Remove duplicates
+    const uniqueSelectedQuestions = Array.from(
+      new Map(allSelectedQuestions.map((q) => [q.id, q])).values()
     );
-    sessionStorage.setItem("selectedQuestions", JSON.stringify(selectedQuestionsData));
+  
+    sessionStorage.setItem("selectedQuestions", JSON.stringify(uniqueSelectedQuestions));
     navigate(`/${contestId}/question-preview`);
   };
 

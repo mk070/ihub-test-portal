@@ -8,6 +8,7 @@ import json
 # MongoDB connection
 client = MongoClient('mongodb+srv://ihub:ihub@test-portal.lcgyx.mongodb.net/test_portal_db?retryWrites=true&w=majority')
 db = client['test_portal_db']
+
 questions_collection = db['MCQ_Questions_Library']
 
 @csrf_exempt

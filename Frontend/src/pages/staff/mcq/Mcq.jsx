@@ -1,4 +1,3 @@
-//mcq.jsx
 import React, { useState, useEffect } from "react";
 import { PlusCircle, Upload, Loader2, Search, ChevronRight, Filter, X } from "lucide-react";
 
@@ -145,7 +144,7 @@ const Dashboard = () => {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/mcq-bulk-upload/", {
+      const response = await fetch("http://127.0.0.1:8000/api/bulk-upload/", {
         method: "POST",
         body: formData,
       });
