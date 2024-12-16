@@ -13,6 +13,7 @@ from django.http import JsonResponse
 from rest_framework import status
 from datetime import datetime, timedelta
 import jwt
+from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,7 @@ def generate_tokens_for_student(student_id, regno):
 
 
 @api_view(["POST"])
+@csrf_exempt
 @permission_classes([AllowAny])  # Allow unauthenticated access for login
 def student_login(request):
     """

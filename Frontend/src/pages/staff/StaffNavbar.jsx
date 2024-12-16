@@ -17,6 +17,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import EmailIcon from '@mui/icons-material/Email';
 
 import logo from "../../assets/snsihub.png"
+import { Link } from "react-router-dom";
 
 
 const Search = styled("div")(({ theme }) => ({
@@ -75,15 +76,13 @@ const StaffNavbar = () => {
             </div>
             <div className="flex items-center gap-8">
               <nav className="flex gap-6 text-white">
-                <a href="#" className="font-medium">Home</a>
-                <a href="/staffstudentprofile/" className="font-medium">Student</a>
-                <a href="#" className="font-medium">Library</a>
+              
 
 
                 <Link to="/staffdashboard" className="font-medium text-white hover:text-yellow-500">
                     Home
                 </Link>
-                <Link to="/students" className="font-medium text-white hover:text-yellow-500">
+                <Link to="/staffstudentprofile" className="font-medium text-white hover:text-yellow-500">
                    Student
                 </Link>
                 <Link to="/library" className="font-medium  text-white hover:text-yellow-500">
