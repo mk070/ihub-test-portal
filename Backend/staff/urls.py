@@ -16,7 +16,6 @@ urlpatterns = [
     path('api/create-assessment/', assessment.create_assessment, name='create_assessment'),
     path('studentprofile/', studentsprofile.student_profile, name='student_profile'), 
     path('studentstats/<str:regno>/', studentstats, name='studentstats'),
-    path('api/student/<str:regno>/', studentstats, name='student_stats'),
  # path('api/assessment/<str:assessment_id>/', views.get_assessment, name='get_assessment'),
 
  

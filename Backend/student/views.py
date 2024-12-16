@@ -40,7 +40,6 @@ def generate_tokens_for_student(student_id, regno):
 
 
 @api_view(["POST"])
-@csrf_exempt
 @permission_classes([AllowAny])  # Allow unauthenticated access for login
 def student_login(request):
     """

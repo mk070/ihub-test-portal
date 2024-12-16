@@ -18,7 +18,6 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import EmailIcon from '@mui/icons-material/Email';
 
 import logo from "../../assets/snsihub.png"
-import { Link } from "react-router-dom";
 
 
 const Search = styled("div")(({ theme }) => ({
