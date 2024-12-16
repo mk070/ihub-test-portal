@@ -29,6 +29,8 @@ import Library from './pages/Library';
 import QuestionPreview from "./pages/staff/coding/QuestionPreview";
 import QuestionDashboard from "./pages/staff/coding/QuestionDashboard";
 import BulkUpload from "./pages/staff/coding/BulkUpload";
+import StaffStudentProfile from './pages/staff/coding/StaffStudentProfile';
+import StudentStats from './pages/staff/coding/studentstats';
 import Mcq from './pages/staff/mcq/Mcq';
 
 // Layout component for wrapping student routes
@@ -80,6 +82,7 @@ function App() {
           <Route path="/OnebyOne" element={<OnebyOne />} />
           <Route path="/ManualPage/:contestId" element={<ManualPage />} />
           <Route path="/CreateContest" element={<CreateContest />} />
+          <Route path="/staffstudentprofile" element={<StaffStudentProfile/>} />         
 
 
           <Route path="/:contestId/Questions" element={<Questions />} />
@@ -90,7 +93,8 @@ function App() {
           <Route path="/QuestionsLibrary/:contestId" element={<QuestionsLibrary />} />          
 
           <Route path="/StartContest" element={<StartContest />} />
-          <Route path="/viewcontest/:contestId" element={<ViewContest />} />
+ <Route path="/studentstats/:regno" element={<StudentStats />} /> 
+           <Route path="/viewcontest/:contestId" element={<ViewContest />} />
           <Route path="/:contestId/question-preview" element={<QuestionPreview />} />
 
           <Route path="/library/coding" element={<QuestionDashboard />} />
