@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from pymongo import MongoClient
 from datetime import datetime
 from bson import ObjectId
+from .utils import *
 
 # MongoDB connection
 client = MongoClient('mongodb+srv://ihub:ihub@test-portal.lcgyx.mongodb.net/test_portal_db?retryWrites=true&w=majority')
@@ -29,6 +30,7 @@ def str_to_datetime(date_str):
         except ValueError:
             # If both parsing methods fail, raise an error
             raise ValueError(f"Invalid datetime format: {date_str}")# Create Assessment (POST method)
+        
 @csrf_exempt
 def create_assessment(request):
     if request.method == "POST":
@@ -36,35 +38,67 @@ def create_assessment(request):
             # Parse the incoming JSON request body
             data = json.loads(request.body.decode('utf-8'))
 
-            # Validation (simplified, you can add more validations as needed)
-            required_fields = ['assessmentName', 'startDateTime', 'guidelines']
-            for field in required_fields:
-                if field not in data:
-                    return JsonResponse({'error': f'{field} is required'}, status=400)
+            # Extract necessary fields from the payload
+            contest_id = str(ObjectId())
+            assessment_overview = data.get('assessmentOverview', {})
+            test_configuration = data.get('testConfiguration', {})
 
-            # Convert start and end dates to datetime objects
+            # Validation for required fields
+            if not contest_id:
+                return JsonResponse({'error': 'contestId is required'}, status=400)
+            if not assessment_overview.get('name'):
+                return JsonResponse({'error': 'assessmentName is required'}, status=400)
+            if not assessment_overview.get('guidelines'):
+                return JsonResponse({'error': 'guidelines are required'}, status=400)
+
+            # Optional: Parse registration start and end dates
             try:
-                start_datetime = str_to_datetime(data['startDateTime'])
-                end_datetime = str_to_datetime(data['endDateTime']) if data['endDateTime'] else None
+                registration_start = (
+                    str_to_datetime(assessment_overview['registrationStart'])
+                    if assessment_overview.get('registrationStart')
+                    else None
+                )
+                registration_end = (
+                    str_to_datetime(assessment_overview['registrationEnd'])
+                    if assessment_overview.get('registrationEnd')
+                    else None
+                )
             except ValueError as e:
-                return JsonResponse({'error': str(e)}, status=400)
+                return JsonResponse({'error': f'Date parsing error: {str(e)}'}, status=400)
 
-            # Create the assessment object to store in MongoDB
-            assessment = {
-                'assessmentName': data['assessmentName'],
-                'startDate': start_datetime,
-                'endDate': end_datetime,
-                'guidelines': data['guidelines'],  # Store the array of guidelines
-                'contestId': str(ObjectId()),  # Creating a unique contest ID
+            # Construct the assessment object
+            assessment_document = {
+                'contestId': contest_id,
+                'assessmentOverview': {
+                    'name': assessment_overview['name'],
+                    'description': assessment_overview.get('description', ""),
+                    'registrationStart': registration_start,
+                    'registrationEnd': registration_end,
+                    'guidelines': assessment_overview['guidelines'],
+                },
+                'testConfiguration': {
+                    'questions': test_configuration.get('questions', ""),
+                    'duration': test_configuration.get('duration', ""),
+                    'fullScreenMode': test_configuration.get('fullScreenMode', False),
+                    'faceDetection': test_configuration.get('faceDetection', False),
+                    'deviceRestriction': test_configuration.get('deviceRestriction', False),
+                    'noiseDetection': test_configuration.get('noiseDetection', False),
+                    'passPercentage': test_configuration.get('passPercentage', ""),
+                },
             }
 
             # Insert the assessment into MongoDB
-            assessments_collection.insert_one(assessment)
+            result = coding_assessments_collection.insert_one(assessment_document)
+            print("result: ",result)
 
-            # Return the contestId in the response
-            return JsonResponse({'message': 'Assessment created successfully!', 'contestId': assessment['contestId']}, status=201)
+            # Return the generated ObjectId in the response
+            return JsonResponse({
+                'message': 'Assessment created successfully!',
+                'assessmentId': contest_id
+            }, status=201)
 
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+            # Catch and handle any unexpected errors
+            return JsonResponse({'error': f'Internal Server Error: {str(e)}'}, status=500)
     else:
         return JsonResponse({'error': 'Only POST method is allowed'}, status=405)

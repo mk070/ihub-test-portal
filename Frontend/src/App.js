@@ -29,6 +29,8 @@ import Library from './pages/Library';
 import QuestionPreview from "./pages/staff/coding/QuestionPreview";
 import QuestionDashboard from "./pages/staff/coding/QuestionDashboard";
 import BulkUpload from "./pages/staff/coding/BulkUpload";
+import StaffStudentProfile from './pages/staff/coding/StaffStudentProfile';
+import StudentStats from './pages/staff/coding/studentstats';
 import Mcq from './pages/staff/mcq/Mcq';
 
 
@@ -39,6 +41,7 @@ const StudentLayout = () => (
     <Outlet /> {/* Render nested routes */}
   </>
 );
+
 
 // Layout component for wrapping staff routes
 const StaffLayout = () => (
@@ -71,7 +74,7 @@ function App() {
         <Route element={<StaffLayout />}>
           <Route path="/staffdashboard" element={<Dashboard />} />
           <Route path="/library" element={<Library />} />
-          <Route path="/assesment" element={<Assesment />} />
+           <Route path="/coding/details" element={<Assesment />} /> {/* coding creation */}
           <Route path="/coding" element={<ContestDashboard />} />
           <Route path="/SelectTestOption" element={<SelectTestOption />} />
           <Route path="/FileUpload" element={<FileUpload />} />
@@ -80,6 +83,7 @@ function App() {
           <Route path="/OnebyOne" element={<OnebyOne />} />
           <Route path="/ManualPage/:contestId" element={<ManualPage />} />
           <Route path="/CreateContest" element={<CreateContest />} />
+          <Route path="/staffstudentprofile" element={<StaffStudentProfile/>} />         
 
 
           <Route path="/:contestId/Questions" element={<Questions />} />
@@ -90,7 +94,8 @@ function App() {
           <Route path="/QuestionsLibrary/:contestId" element={<QuestionsLibrary />} />          
 
           <Route path="/StartContest" element={<StartContest />} />
-          <Route path="/viewcontest/:contestId" element={<ViewContest />} />
+ <Route path="/studentstats/:regno" element={<StudentStats />} /> 
+           <Route path="/viewcontest/:contestId" element={<ViewContest />} />
           <Route path="/:contestId/question-preview" element={<QuestionPreview />} />
 
           <Route path="/library/coding" element={<QuestionDashboard />} />
