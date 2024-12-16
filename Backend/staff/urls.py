@@ -28,7 +28,7 @@ urlpatterns = [
     path('api/create-assessment/', create_assessment, name='create_assessment'),
 
     #mcq
-    path("api/bulk-upload/", bulk_upload, name="bulk_upload"),
+    path("api/mcq-bulk-upload/", bulk_upload, name="mcq_bulk_upload"),
     path("api/upload-single-question/", upload_single_question, name="upload_single_question"),
     path("api/fetch-all-questions/", fetch_all_questions, name="fetch_all_questions"),
 
