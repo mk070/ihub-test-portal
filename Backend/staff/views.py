@@ -8,10 +8,15 @@ from bson import ObjectId
 from datetime import datetime, timedelta
 import logging
 import jwt
+from .utils import *
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from datetime import datetime, timezone
 
 # MongoDB connection
 client = MongoClient("mongodb+srv://ihub:ihub@test-portal.lcgyx.mongodb.net/test_portal_db?retryWrites=true&w=majority")
 db = client['test_portal_db']
+assessments_collection = db['coding_assessments']
 
 logger = logging.getLogger(__name__)
 
@@ -126,7 +131,40 @@ def staff_signup(request):
         return Response(
             {"error": "Something went wrong. Please try again later."}, status=500
         )
-
+#Student Counts Fetching 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def fetch_student_stats(request):
+    """
+    Fetch total number of students and other student-related statistics
+    """
+    try:
+        students_collection = db['students']
+        
+        # Total number of students
+        total_students = students_collection.count_documents({})
+        
+        # Optional: Additional statistics you might want to include
+        students_by_department = list(students_collection.aggregate([
+            {"$group": {
+                "_id": "$department",
+                "count": {"$sum": 1}
+            }}
+        ]))
+        
+        # Optional: Active students (if you have a way to define 'active')
+        active_students = students_collection.count_documents({"status": "active"})
+        
+        return Response({
+            "total_students": total_students,
+            "students_by_department": students_by_department,
+            "active_students": active_students
+        })
+    
+    except Exception as e:
+        logger.error(f"Error fetching student stats: {e}")
+        return Response({"error": "Something went wrong. Please try again later."}, status=500)
+    
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def fetch_contests(request):
@@ -137,7 +175,8 @@ def fetch_contests(request):
     try:
         contest_type = request.query_params.get('type', 'live')
         coding_assessments = db['coding_assessments']
-        current_time = datetime.utcnow()
+        current_time = datetime.utcnow().replace(tzinfo=timezone.utc)  # Ensure UTC timezone for consistency
+        current_date = current_time.date()  # Extract only the current date
 
         # Base query to match assessment documents
         base_query = {}
@@ -180,14 +219,20 @@ def fetch_contests(request):
                     
                     # Get the number of problems
                     problems_count = len(contest.get("problems", []))
-                    
-                    # Determine status
-                    status = "Live"
-                    if start_date:
-                        if current_time < start_date:
+
+                    # Updated logic for status determination
+                    if start_date and end_date:
+                        start_date_only = start_date.date()  # Extract only the date
+                        end_date_only = end_date.date()
+
+                        if current_date < start_date_only:
                             status = "Upcoming"
-                        elif end_date and current_time > end_date:
+                        elif start_date_only <= current_date <= end_date_only:
+                            status = "Live"
+                        elif current_date > end_date_only:
                             status = "Completed"
+                    else:
+                        status = "Upcoming"  # Fallback status if dates are incomplete
 
                     contests.append({
                         "_id": str(contest.get("_id", "")),
@@ -209,14 +254,20 @@ def fetch_contests(request):
                     # Structure 1
                     start_date = contest.get("startDate")
                     end_date = contest.get("endDate")
-                    
-                    # Determine status
-                    status = "Live"
-                    if start_date:
-                        if current_time < start_date:
+
+                    # Updated logic for status determination
+                    if start_date and end_date:
+                        start_date_only = start_date.date()
+                        end_date_only = end_date.date()
+
+                        if current_date < start_date_only:
                             status = "Upcoming"
-                        elif end_date and current_time > end_date:
+                        elif start_date_only <= current_date <= end_date_only:
+                            status = "Live"
+                        elif current_date > end_date_only:
                             status = "Completed"
+                    else:
+                        status = "Upcoming"  # Fallback status if dates are incomplete
 
                     contests.append({
                         "_id": str(contest.get("_id", "")),
@@ -242,3 +293,43 @@ def fetch_contests(request):
     except Exception as e:
         logger.error(f"Error fetching contests: {e}")
         return Response({"error": "Something went wrong. Please try again later."}, status=500)
+    
+#View_Test 
+@csrf_exempt
+def view_test_details(request, contestId):
+    """
+    Fetch details of a specific test from MongoDB using the contestId.
+    """
+    try:
+        # Fetch the test details using the contestId field
+        test_details = assessments_collection.find_one({"contestId": contestId}, {"_id": 0})
+
+        if test_details:
+            # Prepare the response data
+            # context = {
+            #     "assessment_name": test_details.get("assessmentName", "N/A"),
+            #     "start_date": test_details.get("startDate", "N/A"),
+            #     "end_date": test_details.get("endDate", "N/A"),
+            #     "guidelines": test_details.get("guidelines", []),
+            #     "contest_id": test_details.get("contestId", "N/A"),
+            # }
+            return JsonResponse(test_details, safe=False)  
+        else:
+            return JsonResponse({"error": "Test not found"}, status=404)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    
+def contest_details(request, contestID):
+    """
+    Fetch the contest details from MongoDB using the contest_id.
+    """
+    try:
+        # Fetch the contest details from the MongoDB collection using contest_id
+        contest_details = assessments_collection.find_one({"contestId": contestID})
+        if contest_details:
+            return JsonResponse(contest_details, safe=False)
+        else:
+            return JsonResponse({"error": "Contest not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

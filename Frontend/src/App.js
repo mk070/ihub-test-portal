@@ -30,7 +30,7 @@ import QuestionPreview from "./pages/staff/coding/QuestionPreview";
 import QuestionDashboard from "./pages/staff/coding/QuestionDashboard";
 import BulkUpload from "./pages/staff/coding/BulkUpload";
 import Mcq from './pages/staff/mcq/Mcq';
-
+import ViewTest from './pages/staff/coding/ViewTest';
 // Layout component for wrapping student routes
 const StudentLayout = () => (
   <>
@@ -92,6 +92,7 @@ function App() {
           <Route path="/StartContest" element={<StartContest />} />
           <Route path="/viewcontest/:contestId" element={<ViewContest />} />
           <Route path="/:contestId/question-preview" element={<QuestionPreview />} />
+          <Route path="/viewtest/:contestId" element={<ViewTest />} />
 
           <Route path="/library/coding" element={<QuestionDashboard />} />
           <Route path="/BulkUpload" element={<BulkUpload />} />
