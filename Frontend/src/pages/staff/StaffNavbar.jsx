@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -53,6 +54,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 const StaffNavbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const navigate = useNavigate();
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -74,7 +76,7 @@ const StaffNavbar = () => {
               <img src={logo} alt="Logo" className="h-10" />
               
             </div>
-            <div className="flex items-center gap-8">
+            <div className="flex ml-40 items-center gap-8">
               <nav className="flex gap-6 text-white">
               
 
@@ -90,7 +92,6 @@ const StaffNavbar = () => {
                 </Link>
                 <a href="#" className="font-medium"></a>
                 <a href="/" className="font-medium"></a>
-
               </nav>
             </div>
             <div className="flex items-center gap-4 text-white">
