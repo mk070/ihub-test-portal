@@ -338,14 +338,44 @@ const SinglePageStepper = () => {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Duration of the Test
                                 </label>
-                                <input
-                                    type="time"
-                                    name="duration"
-                                    value={formData.testConfiguration.duration}
-                                    onChange={(e) => handleChange(e, "testConfiguration")}
-                                    className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-yellow-500 focus:border-yellow-500"
-                                    required
-                                />
+                                <div className="flex items-center space-x-2">
+                                    {/* Hours Input */}
+                                    <input
+                                        type="number"
+                                        name="hours"
+                                        min="0"
+                                        max="24"
+                                        placeholder="HH"
+                                        value={formData.testConfiguration.duration.hours || ""}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                { target: { name: "duration", value: { ...formData.testConfiguration.duration, hours: e.target.value } } },
+                                                "testConfiguration"
+                                            )
+                                        }
+                                        className="w-16 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-yellow-500 focus:border-yellow-500 text-center"
+                                        required
+                                    />
+                                    <span>:</span>
+                                    {/* Minutes Input */}
+                                    <input
+                                        type="number"
+                                        name="minutes"
+                                        min="0"
+                                        max="59"
+                                        placeholder="MM"
+                                        value={formData.testConfiguration.duration.minutes || ""}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                { target: { name: "duration", value: { ...formData.testConfiguration.duration, minutes: e.target.value } } },
+                                                "testConfiguration"
+                                            )
+                                        }
+                                        className="w-16 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-yellow-500 focus:border-yellow-500 text-center"
+                                        required
+                                    />
+                                    <span className="text-gray-500 text-sm">HH:MM</span>
+                                </div>
                             </div>
 
                             {/* Guidelines and Rules */}
