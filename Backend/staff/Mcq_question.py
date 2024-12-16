@@ -6,9 +6,9 @@ from django.core.files.storage import FileSystemStorage
 import json 
 
 # MongoDB connection
-client = MongoClient('mongodb+srv://projecthunt:123@projecthunt.ke18j.mongodb.net/')
-db = client['projecthunt']
-questions_collection = db['Mcq_Questions_Library']
+client = MongoClient('mongodb+srv://ihub:ihub@test-portal.lcgyx.mongodb.net/test_portal_db?retryWrites=true&w=majority')
+db = client['test_portal_db']
+questions_collection = db['MCQ_Questions_Library']
 
 @csrf_exempt
 def bulk_upload(request):
@@ -21,7 +21,7 @@ def bulk_upload(request):
         
         try:
             # Process the CSV file with UTF-8-BOM encoding
-            with open(file_path, "r", encoding='utf-8-sig') as csv_file:
+            with open(file_path, "r", encoding="utf-8-sig") as csv_file:
                 csv_reader = csv.DictReader(csv_file)
                 questions = []
                 for row in csv_reader:
@@ -33,8 +33,12 @@ def bulk_upload(request):
                     option3 = row.get("option3", "").strip()
                     option4 = row.get("option4", "").strip()
                     answer = row.get("answer", "").strip()
-                    level = row.get("Level", "general").strip()  # Remove trailing space
+                    level = row.get("Level", "").strip().lower()  # Fetch level from file
                     tags = row.get("tags", "").strip().split(",") if "tags" in row else []  # Parse tags as a list
+
+                    # If level is missing or invalid, use 'general' as the default level
+                    if not level or level not in {"easy", "medium", "hard"}:
+                        level = "general"
 
                     # Skip rows with missing critical information
                     if not all([question, option1, option2, option3, option4, answer]):
@@ -47,20 +51,26 @@ def bulk_upload(request):
                         print(f"Invalid answer for question: {question}")
                         continue
 
-                    # Prepare question data
+                    # Prepare question data with the level from the CSV
                     question_data = {
                         "question": question,
                         "options": options,
                         "answer": answer,
-                        "level": level,
+                        "level": level,  # Use level from CSV or default to 'general'
                         "tags": tags
                     }
                     questions.append(question_data)
 
                 # Insert all questions into MongoDB
                 if questions:
+                    # Debug: Print the prepared data
+                    print(f"Prepared questions for insertion: {questions}")
+
+                    # Insert questions into MongoDB
                     result = questions_collection.insert_many(questions)
-                    print(f"Inserted {len(result.inserted_ids)} questions")
+
+                    # Debug: Check the result of insertion
+                    print(f"Inserted {len(result.inserted_ids)} questions with levels: {[q['level'] for q in questions]}")
                     return JsonResponse({
                         "message": f"File uploaded and {len(result.inserted_ids)} questions stored in MongoDB successfully!",
                         "inserted_count": len(result.inserted_ids)
@@ -79,6 +89,9 @@ def bulk_upload(request):
             fs.delete(filename)
     
     return JsonResponse({"error": "Invalid request. Please upload a file."}, status=400)
+
+
+
 
 
 @csrf_exempt

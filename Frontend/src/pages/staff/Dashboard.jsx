@@ -1,3 +1,4 @@
+// Dashboard.jsx
 import React, { useState } from 'react';
 import { FaChartBar, FaUsers, FaClipboardList, FaCheckCircle } from 'react-icons/fa';
 import StatsCard from '../../components/staff/StatsCard';
