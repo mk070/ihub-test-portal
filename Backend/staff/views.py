@@ -127,73 +127,117 @@ def staff_signup(request):
             {"error": "Something went wrong. Please try again later."}, status=500
         )
 
-@api_view(['GET']) 
+@api_view(['GET'])
 @permission_classes([AllowAny])
 def fetch_contests(request):
-    """
+    """ 
     Fetch live or all contests from MongoDB based on query parameters.
+    Handles two different collection structures.
     """
     try:
-        # Extract query parameter
-        contest_type = request.query_params.get('type', 'live')  # Default to "live"
-
-        # MongoDB collection
+        contest_type = request.query_params.get('type', 'live')
         coding_assessments = db['coding_assessments']
         current_time = datetime.utcnow()
 
-        # Query for contests
+        # Base query to match assessment documents
+        base_query = {}
+
+        # Add time-based filters for live contests
         if contest_type == 'live':
-            contests_cursor = coding_assessments.find({
-                "$and": [
-                    {"startDate": {"$lte": current_time}},  # Contest has started
-                    {"$or": [
-                        {"endDate": {"$gte": current_time}}, 
-                        {"endDate": None}
-                    ]}  # Contest is ongoing
+            base_query.update({
+                "$or": [
+                    # Structure 1: Direct startDate and endDate
+                    {
+                        "startDate": {"$lte": current_time},
+                        "endDate": {"$gte": current_time}
+                    },
+                    # Structure 2: Registration-based filtering
+                    {
+                        "assessmentOverview.registrationStart": {"$lte": current_time},
+                        "$or": [
+                            {"assessmentOverview.registrationEnd": {"$gte": current_time}},
+                            {"assessmentOverview.registrationEnd": None}
+                        ]
+                    }
                 ]
             })
-        elif contest_type == 'all':
-            contests_cursor = coding_assessments.find()
-        else:
-            return Response({"error": "Invalid type parameter. Use 'live' or 'all'."}, status=400)
 
-        # Process contests
+        contests_cursor = coding_assessments.find(base_query)
         contests = []
+
         for contest in contests_cursor:
             try:
-                start_date = contest.get("startDate")
-                end_date = contest.get("endDate")
+                # Determine which structure we're dealing with
+                if "assessmentOverview" in contest:
+                    # Structure 2
+                    start_date = contest.get("assessmentOverview", {}).get("registrationStart")
+                    end_date = contest.get("assessmentOverview", {}).get("registrationEnd")
+                    assessment_name = contest.get("assessmentOverview", {}).get("name", "Unnamed Contest")
+                    guidelines = contest.get("assessmentOverview", {}).get("guidelines", [])
+                    
+                    # Get the test configuration
+                    test_config = contest.get("testConfiguration", {})
+                    
+                    # Get the number of problems
+                    problems_count = len(contest.get("problems", []))
+                    
+                    # Determine status
+                    status = "Live"
+                    if start_date:
+                        if current_time < start_date:
+                            status = "Upcoming"
+                        elif end_date and current_time > end_date:
+                            status = "Completed"
 
-                # Ensure startDate and endDate are parsed correctly
-                if isinstance(start_date, str):
-                    start_date = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
-                if isinstance(end_date, str):
-                    end_date = datetime.fromisoformat(end_date.replace('Z', '+00:00')) if end_date else None
+                    contests.append({
+                        "_id": str(contest.get("_id", "")),
+                        "contestId": contest.get("contestId", ""),
+                        "assessmentName": assessment_name,
+                        "type": "Coding",
+                        "category": "Technical",
+                        "startDate": start_date,
+                        "endDate": end_date,
+                        "duration": test_config.get("duration", ""),
+                        "guidelines": guidelines,
+                        "assigned": len(contest.get("visible_to", [])),
+                        "register": contest.get("register", 0),
+                        "complete": contest.get("complete", 0),
+                        "totalQuestions": problems_count,
+                        "status": status
+                    })
+                else:
+                    # Structure 1
+                    start_date = contest.get("startDate")
+                    end_date = contest.get("endDate")
+                    
+                    # Determine status
+                    status = "Live"
+                    if start_date:
+                        if current_time < start_date:
+                            status = "Upcoming"
+                        elif end_date and current_time > end_date:
+                            status = "Completed"
 
-                # Dynamically calculate 'assigned' count based on 'visible_to' array length
-                assigned_count = len(contest.get("visible_to", []))
+                    contests.append({
+                        "_id": str(contest.get("_id", "")),
+                        "contestId": contest.get("contestId", ""),
+                        "assessmentName": contest.get("assessmentName", "Unnamed Contest"),
+                        "type": "Coding",
+                        "category": "Technical",
+                        "startDate": start_date,
+                        "endDate": end_date,
+                        "guidelines": contest.get("guidelines", []),
+                        "status": status
+                    })
 
-                contests.append({
-                    "_id": str(contest.get("_id", "")),
-                    "assessmentName": contest.get("assessmentName", "Unnamed Contest"),
-                    "startDate": start_date,
-                    "endDate": end_date,
-                    "guidelines": contest.get("guidelines", []),
-                    "contestId": contest.get("contestId", ""),
-                    "assigned": assigned_count,  # Use calculated 'assigned' count
-                    "register": contest.get("register", 0),
-                    "complete": contest.get("complete", 0),
-                    "status": "Live" if start_date and current_time >= start_date and (
-                        not end_date or current_time <= end_date
-                    ) else "Upcoming"
-                })
             except Exception as e:
-                logger.error(f"Error processing contest: {contest.get('_id', 'unknown')} - {e}")
+                logger.error(f"Error processing contest {contest.get('_id', 'unknown')}: {e}")
+                continue
 
-        if not contests:
-            logger.info("No contests found for the given type.")
-
-        return Response({"contests": contests})
+        return Response({
+            "contests": contests,
+            "total": len(contests)
+        })
 
     except Exception as e:
         logger.error(f"Error fetching contests: {e}")

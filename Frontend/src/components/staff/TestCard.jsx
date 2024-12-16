@@ -2,7 +2,12 @@ import React from 'react';
 
 const TestCard = ({ title, type, date, category, stats, status, onView }) => {
   // Dynamic styles for the status
-  const statusStyles = status === 'Live' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800';
+  const statusStyles = 
+  status === 'Live'
+    ? 'bg-green-200 text-green-800' 
+    : status === 'Upcoming'
+      ? 'bg-yellow-300 text-black' 
+      : 'bg-red-500 text-white';
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm">
