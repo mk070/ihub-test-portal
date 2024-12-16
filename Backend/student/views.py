@@ -21,19 +21,21 @@ logger = logging.getLogger(__name__)
 JWT_SECRET = 'test'
 JWT_ALGORITHM = "HS256"
 
-def generate_tokens_for_student(student_id):
+def generate_tokens_for_student(student_id, regno):
     """
-    Generate a secure access token (JWT) for a user with a MongoDB ObjectId.
+    Generate a secure access token (JWT) for a user with a MongoDB ObjectId and regno.
     """
     access_payload = {
         'student_id': str(student_id),
+        'regno': regno,  # Add regno to the token payload
         'exp': datetime.utcnow() + timedelta(minutes=600),  # Access token expiration
         'iat': datetime.utcnow(),
     }
 
     # Encode the token
-    token = jwt.encode(access_payload, 'test', algorithm="HS256")
+    token = jwt.encode(access_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
     return {'jwt': token}
+
 
 
 @api_view(["POST"])
@@ -59,8 +61,11 @@ def student_login(request):
         # Check password
         stored_password = student_user["password"]
         if check_password(password, stored_password):
-            # Generate tokens
-            tokens = generate_tokens_for_student(str(student_user["_id"]))
+            # Generate tokens with regno included
+            tokens = generate_tokens_for_student(
+                str(student_user["_id"]),
+                student_user.get("regno")
+            )
 
             # Create response and set secure cookie
             response = Response({
@@ -75,16 +80,18 @@ def student_login(request):
             })
 
             # Use `secure=False` for local development
-            response.set_cookie(key='jwt', 
-                                value=tokens['jwt'], 
-                                httponly=True, 
-                                samesite='Lax', 
-                                secure=False,
-                                max_age= 1 * 24 * 60 * 60  )
+            response.set_cookie(
+                key='jwt',
+                value=tokens['jwt'],
+                httponly=True,
+                samesite='Lax',
+                secure=False,
+                max_age=1 * 24 * 60 * 60  # 1 day in seconds
+            )
             return response
 
         return Response({"error": "Invalid email or password"}, status=401)
-    
+
     except KeyError as e:
         logger.error(f"Missing key: {e}")
         return Response({"error": "Invalid data provided"}, status=400)
@@ -206,70 +213,53 @@ def get_students(request):
         return Response({"error": str(e)}, status=500)
 
 @api_view(["GET"])
-@permission_classes([AllowAny])  # Allow  without authentication
+@permission_classes([AllowAny])  # Allow unauthenticated access for testing
 def get_tests_for_student(request):
-    print("get_tests_for_student function triggered")  # Debugging line
     """
-    API to fetch tests assigned to a student.
-    Combines data from contest_details and finalQuestions collections.
+    API to fetch tests assigned to a student based on regno from JWT.
     """
     try:
         # Retrieve the JWT token from cookies
         jwt_token = request.COOKIES.get("jwt")
-        # print(f"JWT Token: {jwt_token}")
         if not jwt_token:
             raise AuthenticationFailed("Authentication credentials were not provided.")
 
         # Decode the JWT token
         try:
-            decoded_token = jwt.decode(jwt_token, 'test', algorithms=["HS256"])
-            # print(f"Decoded Token: {decoded_token}")
+            decoded_token = jwt.decode(jwt_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Access token has expired. Please log in again.")
         except jwt.InvalidTokenError:
             raise AuthenticationFailed("Invalid token. Please log in again.")
 
-        # Extract student ID from the decoded token
-        student_id = decoded_token.get("student_id")
-
-        if not student_id:
+        # Extract regno from the decoded token
+        regno = decoded_token.get("regno")
+        if not regno:
             return JsonResponse({"error": "Invalid token payload."}, status=401)
 
-        regno = request.query_params.get("regno")  # Get student's registration number
-
-        if not regno:
-            return JsonResponse({"error": "regno is required"}, status=400)
-
-        # Fetch all contests where the student is visible
-        visible_contests = list(final_questions_collection.find(
-            {"visible_to": regno},  # Match visible_to array with the student's regno
-            {"contestId": 1, "_id": 0}  # Only fetch contestId
-        ))
-
-        # Extract contest IDs
-        contest_ids = [contest["contestId"] for contest in visible_contests]
-
-        if not contest_ids:
-            return JsonResponse([], safe=False, status=200)
-
-        # Fetch contest details from contest_details collection
-        contests = list(contest_details_collection.find(
-            {"contest_id": {"$in": contest_ids}},  # Match contest_id with fetched contest IDs
+        # Fetch contests where the student is visible in `visible_to`
+        contests = list(coding_assessments_collection.find(
+            {"visible_to": regno},
             {
-                "_id": 0,  # Exclude MongoDB's _id field
-                "contest_name": 1,
-                "start_time": 1,
-                "end_time": 1,
-                "organization_type": 1,
-                "organization_name": 1,
-                "testType": 1,
-                "contest_id": 1
+                "_id": 0,
+                "assessmentName": 1,
+                "startDate": 1,
+                "endDate": 1,
+                "guidelines": 1,
+                "contestId": 1,
+                "problems.title": 1,
+                "problems.level": 1,
+                "problems.problem_statement": 1,
             }
         ))
 
+        if not contests:
+            return JsonResponse([], safe=False, status=200)  # Return an empty list if no contests are found
+
         return JsonResponse(contests, safe=False, status=200)
 
+    except AuthenticationFailed as auth_error:
+        return JsonResponse({"error": str(auth_error)}, status=401)
     except Exception as e:
         print("Error fetching tests for student:", str(e))
         return JsonResponse({"error": "Failed to fetch tests"}, status=500)
-

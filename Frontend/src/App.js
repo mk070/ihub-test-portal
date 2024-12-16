@@ -25,17 +25,22 @@ import ViewContest from './pages/staff/coding/ViewContest';
 import Assesment from './pages/staff/coding/Assesment';
 import QuestionsLibrary from './pages/staff/coding/QuestionsLibrary';
 import Questions from './pages/staff/coding/Questions';
+import Library from './pages/Library';
 import QuestionPreview from "./pages/staff/coding/QuestionPreview";
 import QuestionDashboard from "./pages/staff/coding/QuestionDashboard";
 import BulkUpload from "./pages/staff/coding/BulkUpload";
 import StaffStudentProfile from './pages/staff/coding/StaffStudentProfile';
 import StudentStats from './pages/staff/coding/studentstats';
+import Mcq from './pages/staff/mcq/Mcq';
+
+// Layout component for wrapping student routes
 const StudentLayout = () => (
   <>
     <Navbar />
     <Outlet /> {/* Render nested routes */}
   </>
 );
+
 
 // Layout component for wrapping staff routes
 const StaffLayout = () => (
@@ -67,7 +72,8 @@ function App() {
         <Route path="/staffsignup" element={<Signup />} />
         <Route element={<StaffLayout />}>
           <Route path="/staffdashboard" element={<Dashboard />} />
-          <Route path="/assesment" element={<Assesment />} />
+          <Route path="/library" element={<Library />} />
+           <Route path="/coding/details" element={<Assesment />} /> {/* coding creation */}
           <Route path="/coding" element={<ContestDashboard />} />
           <Route path="/SelectTestOption" element={<SelectTestOption />} />
           <Route path="/FileUpload" element={<FileUpload />} />
@@ -77,8 +83,15 @@ function App() {
           <Route path="/ManualPage/:contestId" element={<ManualPage />} />
           <Route path="/CreateContest" element={<CreateContest />} />
           <Route path="/staffstudentprofile" element={<StaffStudentProfile/>} />         
+
+
           <Route path="/:contestId/Questions" element={<Questions />} />
           <Route path="/:contestId/QuestionsLibrary" element={<QuestionsLibrary />} />          
+
+          <Route path="/library/Mcq" element={<Mcq/>} />
+          <Route path="/Questions/:contestId" element={<Questions />} />
+          <Route path="/QuestionsLibrary/:contestId" element={<QuestionsLibrary />} />          
+
           <Route path="/StartContest" element={<StartContest />} />
  <Route path="/studentstats/:regno" element={<StudentStats />} /> 
            <Route path="/viewcontest/:contestId" element={<ViewContest />} />
