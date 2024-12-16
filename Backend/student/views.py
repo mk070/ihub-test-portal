@@ -13,7 +13,6 @@ from django.http import JsonResponse
 from rest_framework import status
 from datetime import datetime, timedelta
 import jwt
-from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
 
