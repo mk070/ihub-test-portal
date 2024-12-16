@@ -46,18 +46,28 @@ const StudentDashboard = () => {
       console.error("Error fetching student data:", error);
     }
   };
-
   const fetchOpenTests = async (regno) => {
     try {
       const response = await axios.get(`http://localhost:8000/api/student/tests?regno=${regno}`, {
-        withCredentials: true, // Include cookies for authentication
+        withCredentials: true,
       });
-      setOpenTests(response.data); // Expected to return contests visible to this student
+  
+      // Map and format test data for display
+      const formattedTests = response.data.map((test) => ({
+        contestId: test.contestId,
+        name: test.assessmentOverview?.name || "Unknown Test",
+        description: test.assessmentOverview?.description || "No description available.",
+        starttime: test.assessmentOverview?.registrationStart || "No Time",
+        endtime: test.assessmentOverview?.registrationEnd || "No Time",
+        problems: test.problems || [],
+      }));
+  
+      setOpenTests(formattedTests);
     } catch (error) {
       console.error("Error fetching open tests:", error);
     }
   };
-
+  
   useEffect(() => {
     fetchStudentData();
   }, []);
@@ -88,7 +98,16 @@ const StudentDashboard = () => {
             {activeTab === 0 && (
               <Box>
                 {openTests.length > 0 ? (
-                  openTests.map((test) => <TestCard key={test._id} test={test} />)
+                  openTests.map((test) => (
+                    <TestCard
+                      key={test.contestId}
+                      test={test}
+                      name={test.name}
+                      description={test.description}
+                      starttime={test.starttime}
+                      endtime={test.endtime}
+                    />
+                  ))
                 ) : (
                   <Box className="text-center">
                     <img
