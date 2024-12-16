@@ -88,7 +88,7 @@ const StudentDashboard = () => {
             {activeTab === 0 && (
               <Box>
                 {openTests.length > 0 ? (
-                  openTests.map((test) => <TestCard key={test._id} test={test} />)
+                  openTests.map((test) => <TestCard key={test.contestId} test={test} />)
                 ) : (
                   <Box className="text-center">
                     <img

@@ -102,8 +102,8 @@ function App() {
           <Route path="/BulkUpload" element={<BulkUpload />} />
 
         </Route>
-        <Route path="/testinstructions/:testId" element={<TestInstructions />} />
-        <Route path="/Contest/:testId" element={<ContestPage />} />
+        <Route path="/testinstructions/:contestId" element={<TestInstructions />} />
+        <Route path="/Contest/:contestId" element={<ContestPage />} />
 
         {/* New View Contest Route */}
       </Routes>
