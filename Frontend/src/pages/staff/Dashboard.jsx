@@ -28,6 +28,7 @@ const Dashboard = () => {
 
   // Fetch stats and tests dynamically
   useEffect(() => {
+
     // Parallel API calls for contests and student stats
     Promise.all([
       api.get('/api/contests/live?type=all'),
@@ -62,14 +63,15 @@ const Dashboard = () => {
     });
   }, []);
 
+
   const handleModalOpen = () => setIsModalOpen(true);
   const handleModalClose = () => setIsModalOpen(false);
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* Header Section */}
       <div className="bg-gradient-to-r from-[#00296B] to-[#0077B6] mx-3 rounded-b-2xl p-6 mb-8">
         <h2 className="text-3xl text-white mb-8 font-bold">Overall Stats</h2>
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <StatsCard icon={<FaChartBar />} title="Test Created" value={stats.created} />
           <StatsCard icon={<FaUsers />} title="No of Students" value={stats.students} />
@@ -78,6 +80,7 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Main Content Section */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Tabs and Create Test Button */}
         <div className="flex justify-between items-center mb-6">
@@ -99,23 +102,35 @@ const Dashboard = () => {
             <Loader />
           ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {tests.map((test) => (
-            <TestCard
-              key={test._id}
-              contestId={test.contestId}
-              title={test.assessmentName}
-              type={test.type || 'General'}
-              date={test.startDate ? new Date(test.startDate).toLocaleDateString() : 'N/A'}
-              category={test.category || 'General'}
-              stats={{
-                Assigned: test.assigned || 0,
-                Register: test.register || 0,
-                Completed: test.complete || 0,
-              }}
-              status={test.status || 'Upcoming'}
-              onView={() => console.log('Viewing test:', test._id)}
-            />
-          ))}
+
+          {tests.map((test) => {
+            const title = test.assessmentName || 'Unnamed Contest';
+            const type = test.type || 'General';
+            const date = test.startDate
+              ? new Date(test.startDate).toLocaleDateString()
+              : 'Date Unavailable';
+            const category = test.category || 'Uncategorized';
+            const status = test.status || 'Upcoming';
+
+            return (
+              <TestCard
+                key={test._id || test.contestId}
+                contestId={test.contestId || test._id}
+                title={title}
+                type={type}
+                date={date}
+                category={category}
+                stats={{
+                  Assigned: test.assigned || 0,
+                  Register: test.register || 0,
+                  Completed: test.complete || 0,
+                }}
+                status={status}
+                onView={() => console.log('Viewing test:', test._id || test.contestId)}
+              />
+            );
+          })}
+
         </div>
         )}
       </div>
@@ -166,19 +181,12 @@ const Dashboard = () => {
                   '&:hover': { backgroundColor: '#F5F5F5' },
                 }}
                 onClick={() => {
-                  console.log('Skill Assessment selected');
                   navigate('/coding/details');
                   handleModalClose();
                 }}
               >
-                <img
-                  src={mcq}
-                  alt="Skill Assessment"
-                  style={{ maxWidth: '80px', margin: '0 auto' }}
-                />
-                <Typography variant="h6" mt={2}>
-                  Skill Assessment
-                </Typography>
+                <img src={mcq} alt="Skill Assessment" style={{ maxWidth: '80px', margin: '0 auto' }} />
+                <Typography variant="h6" mt={2}>Skill Assessment</Typography>
                 <Typography variant="body2" color="textSecondary">
                   Evaluations to test knowledge and skills across different topics
                 </Typography>
@@ -188,8 +196,8 @@ const Dashboard = () => {
               <Box
                 sx={{
                   p: 3,
-                  height: '230px',
                   textAlign: 'center',
+                  height: '230px',
                   border: '1px solid #E0E0E0',
                   borderRadius: '12px',
                   cursor: 'pointer',
@@ -197,20 +205,12 @@ const Dashboard = () => {
                   '&:hover': { backgroundColor: '#F5F5F5' },
                 }}
                 onClick={() => {
-                  console.log('Code Contest selected');
                   navigate('/coding/details');
-
                   handleModalClose();
                 }}
               >
-                <img
-                  src={code}
-                  alt="Code Contest"
-                  style={{ maxWidth: '80px', margin: '0 auto' }}
-                />
-                <Typography variant="h6" mt={2}>
-                  Code Contest
-                </Typography>
+                <img src={code} alt="Code Contest" style={{ maxWidth: '80px', margin: '0 auto' }} />
+                <Typography variant="h6" mt={2}>Code Contest</Typography>
                 <Typography variant="body2" color="textSecondary">
                   Challenges to assess programming and problem-solving skills
                 </Typography>
@@ -222,11 +222,7 @@ const Dashboard = () => {
           <Typography
             variant="body2"
             color="textSecondary"
-            sx={{
-              textAlign: 'center',
-              width: '100%',
-              marginBottom: '16px',
-            }}
+            sx={{ textAlign: 'center', width: '100%', marginBottom: '16px' }}
           >
             You can select a test type to proceed or close the dialog.
           </Typography>
