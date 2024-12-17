@@ -6,7 +6,7 @@ const TestCard = ({ test }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate(`/testinstructions/${test.contest_id}`);
+    navigate(`/testinstructions/${test.contestId}`);
   };
 
   return (

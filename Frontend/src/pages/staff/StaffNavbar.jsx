@@ -77,10 +77,13 @@ const StaffNavbar = () => {
             </div>
             <div className="flex ml-40 items-center gap-8">
               <nav className="flex gap-6 text-white">
+              
+
+
                 <Link to="/staffdashboard" className="font-medium text-white hover:text-yellow-500">
                     Home
                 </Link>
-                <Link to="/students" className="font-medium text-white hover:text-yellow-500">
+                <Link to="/staffstudentprofile" className="font-medium text-white hover:text-yellow-500">
                    Student
                 </Link>
                 <Link to="/library" className="font-medium  text-white hover:text-yellow-500">

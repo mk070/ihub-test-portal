@@ -29,8 +29,13 @@ import Library from './pages/Library';
 import QuestionPreview from "./pages/staff/coding/QuestionPreview";
 import QuestionDashboard from "./pages/staff/coding/QuestionDashboard";
 import BulkUpload from "./pages/staff/coding/BulkUpload";
+import StaffStudentProfile from './pages/staff/coding/StaffStudentProfile';
+import StudentStats from './pages/staff/coding/studentstats';
 import Mcq from './pages/staff/mcq/Mcq';
 import ViewTest from './pages/staff/coding/ViewTest';
+
+
+
 // Layout component for wrapping student routes
 const StudentLayout = () => (
   <>
@@ -80,6 +85,7 @@ function App() {
           <Route path="/OnebyOne" element={<OnebyOne />} />
           <Route path="/ManualPage/:contestId" element={<ManualPage />} />
           <Route path="/CreateContest" element={<CreateContest />} />
+          <Route path="/staffstudentprofile" element={<StaffStudentProfile/>} />         
 
 
           <Route path="/:contestId/Questions" element={<Questions />} />
@@ -90,7 +96,8 @@ function App() {
           <Route path="/QuestionsLibrary/:contestId" element={<QuestionsLibrary />} />          
 
           <Route path="/StartContest" element={<StartContest />} />
-          <Route path="/viewcontest/:contestId" element={<ViewContest />} />
+ <Route path="/studentstats/:regno" element={<StudentStats />} /> 
+           <Route path="/viewcontest/:contestId" element={<ViewContest />} />
           <Route path="/:contestId/question-preview" element={<QuestionPreview />} />
           <Route path="/viewtest/:contestId" element={<ViewTest />} />
 
@@ -98,8 +105,8 @@ function App() {
           <Route path="/BulkUpload" element={<BulkUpload />} />
 
         </Route>
-        <Route path="/testinstructions/:testId" element={<TestInstructions />} />
-        <Route path="/Contest/:testId" element={<ContestPage />} />
+        <Route path="/testinstructions/:contestId" element={<TestInstructions />} />
+        <Route path="/Contest/:contestId" element={<ContestPage />} />
 
         {/* New View Contest Route */}
       </Routes>

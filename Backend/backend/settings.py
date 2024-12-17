@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "staff",  # Add your app here
     'rest_framework',
     'django_extensions',
+    'student',
 ]
 CSRF_COOKIE_SECURE = False
 
@@ -49,7 +50,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",  # Add this line
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    # "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
