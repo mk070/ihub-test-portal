@@ -97,17 +97,18 @@ function App() {
           <Route path="/QuestionsLibrary/:contestId" element={<QuestionsLibrary />} />          
 
           <Route path="/StartContest" element={<StartContest />} />
- <Route path="/studentstats/:regno" element={<StudentStats />} /> 
+           <Route path="/studentstats/:regno" element={<StudentStats />} /> 
            <Route path="/viewcontest/:contestId" element={<ViewContest />} />
           <Route path="/:contestId/question-preview" element={<QuestionPreview />} />
+          <Route path="/viewtest/:contestId" element={<ViewTest />} />
 
           <Route path="/library/coding" element={<QuestionDashboard />} />
           <Route path="/BulkUpload" element={<BulkUpload />} />
           <Route path="/viewtest/:contestId" element={<ViewTest />} />
 
         </Route>
-        <Route path="/testinstructions/:testId" element={<TestInstructions />} />
-        <Route path="/Contest/:testId" element={<ContestPage />} />
+        <Route path="/testinstructions/:contestId" element={<TestInstructions />} />
+        <Route path="/Contest/:contestId" element={<ContestPage />} />
 
         {/* New View Contest Route */}
       </Routes>

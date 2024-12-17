@@ -1,15 +1,20 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const TestCard = ({ title, type, date, category, stats, status, contestId }) => {
-
+const TestCard = ({ title, type, date, category, stats, status, onView, contestId }) => {
   const navigate = useNavigate();
   // Dynamic styles for the status
-  
-
-  const handleViewTest = () => {
+    const handleViewTest = () => {
     navigate(`/viewtest/${contestId}`); // Navigate to the ViewTest page with the testId
   };
+
+  // Dynamic styles for the status
+  const statusStyles = 
+  status === 'Live'
+    ? 'bg-green-200 text-green-800' 
+    : status === 'Upcoming'
+      ? 'bg-yellow-200 text-yellow-800' 
+      : 'bg-red-300 text-red-800';
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -19,7 +24,7 @@ const TestCard = ({ title, type, date, category, stats, status, contestId }) => 
           <h3 className="text-lg font-semibold">{title}</h3>
         </div>
         <button
-          onClick={handleViewTest} 
+          onClick={handleViewTest}
           className="px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-colors"
         >
           View Test

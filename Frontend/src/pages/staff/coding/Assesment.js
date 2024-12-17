@@ -203,12 +203,27 @@ const SinglePageStepper = () => {
 
                             {/* Registration Start Date & Time */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Registration Start Date & Time</label>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Registration Start Date & Time
+                                </label>
                                 <input
                                     type="datetime-local"
                                     name="registrationStart"
                                     value={formData.assessmentOverview.registrationStart}
-                                    onChange={(e) => handleChange(e, "assessmentOverview")}
+                                    onChange={(e) => {
+                                        const currentTime = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                                        const selectedTime = e.target.value;
+
+                                        // Validation: Check if selected time is in the future
+                                        if (selectedTime <= currentTime) {
+                                            alert("The selected date and time must be in the future.");
+                                            return; // Prevent updating the state with invalid value
+                                        }
+
+                                        // Update form data
+                                        handleChange(e, "assessmentOverview");
+                                    }}
+                                    min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)} // Set minimum to current time
                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                     required
                                 />
@@ -216,16 +231,37 @@ const SinglePageStepper = () => {
 
                             {/* Registration End Date & Time */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Registration End Date & Time</label>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Registration End Date & Time
+                                </label>
                                 <input
                                     type="datetime-local"
                                     name="registrationEnd"
                                     value={formData.assessmentOverview.registrationEnd}
-                                    onChange={(e) => handleChange(e, "assessmentOverview")}
+                                    onChange={(e) => {
+                                        const currentTime = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                                        const selectedTime = e.target.value;
+                                        const startTime = formData.assessmentOverview.registrationStart;
+
+                                        // Validation: Check if selected time is in the future and after the start time
+                                        if (selectedTime <= currentTime) {
+                                            alert("The selected date and time must be in the future.");
+                                            return; // Prevent updating the state with invalid value
+                                        }
+
+                                        if (startTime && selectedTime <= startTime) {
+                                            alert("The end time must be after the start time.");
+                                            return; // Prevent updating the state with invalid value
+                                        }
+
+                                        // Update form data
+                                        handleChange(e, "assessmentOverview");
+                                    }}
+                                    min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)} // Set minimum to current time
                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                     required
                                 />
-                            </div>
+</div>
 
                             {/* Number of Registrations Allowed
                             <div>
@@ -302,14 +338,44 @@ const SinglePageStepper = () => {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Duration of the Test
                                 </label>
-                                <input
-                                    type="time"
-                                    name="duration"
-                                    value={formData.testConfiguration.duration}
-                                    onChange={(e) => handleChange(e, "testConfiguration")}
-                                    className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-yellow-500 focus:border-yellow-500"
-                                    required
-                                />
+                                <div className="flex items-center space-x-2">
+                                    {/* Hours Input */}
+                                    <input
+                                        type="number"
+                                        name="hours"
+                                        min="0"
+                                        max="24"
+                                        placeholder="HH"
+                                        value={formData.testConfiguration.duration.hours || ""}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                { target: { name: "duration", value: { ...formData.testConfiguration.duration, hours: e.target.value } } },
+                                                "testConfiguration"
+                                            )
+                                        }
+                                        className="w-16 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-yellow-500 focus:border-yellow-500 text-center"
+                                        required
+                                    />
+                                    <span>:</span>
+                                    {/* Minutes Input */}
+                                    <input
+                                        type="number"
+                                        name="minutes"
+                                        min="0"
+                                        max="59"
+                                        placeholder="MM"
+                                        value={formData.testConfiguration.duration.minutes || ""}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                { target: { name: "duration", value: { ...formData.testConfiguration.duration, minutes: e.target.value } } },
+                                                "testConfiguration"
+                                            )
+                                        }
+                                        className="w-16 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-yellow-500 focus:border-yellow-500 text-center"
+                                        required
+                                    />
+                                    <span className="text-gray-500 text-sm">HH:MM</span>
+                                </div>
                             </div>
 
                             {/* Guidelines and Rules */}

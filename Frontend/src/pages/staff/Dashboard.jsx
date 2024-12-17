@@ -25,24 +25,37 @@ const Dashboard = () => {
 
   // Fetch stats and tests dynamically
   useEffect(() => {
-    api.get('/api/contests/live?type=all')
-      .then((response) => {
-        const contests = response.data?.contests || []; // Safe access to response data
-        setTests(contests);
+    // Parallel API calls for contests and student stats
+    Promise.all([
+      api.get('/api/contests/live?type=all'),
+      api.get('/api/student-stats')
+    ])
+    .then(([contestResponse, studentStatsResponse]) => {
+      const contests = contestResponse.data.contests || [];
+      setTests(contests);
 
-        // Aggregate statistics
-        const created = contests.length;
-        const students = contests.reduce((acc, contest) => acc + (contest.register || 0), 0);
-        const liveTests = contests.filter((contest) => contest.status === 'Live').length;
-        const completedTests = contests.reduce((acc, contest) => acc + (contest.complete || 0), 0);
+      const created = contests.length;
+      const liveTests = contests.filter((contest) => contest.status === 'Live').length;
+      const completedTests = contests.filter((contest) => 
+        contest.status === 'Completed' || 
+        (contest.testEndDate && new Date(contest.testEndDate) < new Date())
+      ).length;
 
-        setStats({ created, students, liveTests, completedTests });
-      })
-      .catch((error) => {
-        console.error('Error fetching contests:', error);
-        setTests([]); // Reset tests on error
+      // Get total students from the new API endpoint
+      const totalStudents = studentStatsResponse.data.total_students || 0;
+
+      setStats({ 
+        created, 
+        students: totalStudents, 
+        liveTests, 
+        completedTests 
       });
-  }, []);
+    })
+    .catch((error) => {
+      console.error('Error fetching data:', error);
+      // Optional: Add error handling for the user
+    });
+  }, []);
 
   const handleModalOpen = () => setIsModalOpen(true);
   const handleModalClose = () => setIsModalOpen(false);
@@ -79,33 +92,23 @@ const Dashboard = () => {
 
         {/* Test Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {tests.map((test) => {
-            const title = test.assessmentName || 'Unnamed Contest';
-            const type = test.type || 'General';
-            const date = test.startDate
-              ? new Date(test.startDate).toLocaleDateString()
-              : 'Date Unavailable';
-            const category = test.category || 'Uncategorized';
-            const status = test.status || 'Upcoming';
-
-            return (
-              <TestCard
-                key={test._id || test.contestId}
-                contestId={test.contestId || test._id}
-                title={title}
-                type={type}
-                date={date}
-                category={category}
-                stats={{
-                  Assigned: test.assigned || 0,
-                  Register: test.register || 0,
-                  Completed: test.complete || 0,
-                }}
-                status={status}
-                onView={() => console.log('Viewing test:', test._id || test.contestId)}
-              />
-            );
-          })}
+          {tests.map((test) => (
+            <TestCard
+              key={test._id}
+              contestId={test.contestId}
+              title={test.assessmentName}
+              type={test.type || 'General'}
+              date={test.startDate ? new Date(test.startDate).toLocaleDateString() : 'N/A'}
+              category={test.category || 'General'}
+              stats={{
+                Assigned: test.assigned || 0,
+                Register: test.register || 0,
+                Completed: test.complete || 0,
+              }}
+              status={test.status || 'Upcoming'}
+              onView={() => console.log('Viewing test:', test._id)}
+            />
+          ))}
         </div>
       </div>
 
