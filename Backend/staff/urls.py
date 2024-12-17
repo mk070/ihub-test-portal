@@ -6,8 +6,9 @@ from . import studentsprofile
 from staff.studentstats import studentstats
 from .studentstats import studentstats
 from .assessment import create_assessment
-from .Mcq_question import bulk_upload, upload_single_question, fetch_all_questions
+from .Mcq_question import bulk_upload, upload_single_question, fetch_all_questions, update_question, delete_question
 from .views import fetch_contests
+from .views import fetch_student_stats
 
 urlpatterns = [
     # Authentication
@@ -31,7 +32,9 @@ urlpatterns = [
     path("api/mcq-bulk-upload/", bulk_upload, name="mcq_bulk_upload"),
     path("api/upload-single-question/", upload_single_question, name="upload_single_question"),
     path("api/fetch-all-questions/", fetch_all_questions, name="fetch_all_questions"),
+    path("api/update_question/<str:question_id>/", update_question, name="update_question"),
+    path("api/delete_question/<str:question_id>/", delete_question, name="delete_question"),
 
-
+    path('api/student-stats', fetch_student_stats, name='student_stats'),
 ]
 
