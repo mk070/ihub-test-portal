@@ -43,7 +43,7 @@ def generate_tokens_for_student(student_id, regno):
 def student_login(request):
     """
     Login view for students
-    """
+    """ 
     try:
         data = request.data
         email = data.get("email")
@@ -79,7 +79,7 @@ def student_login(request):
                 "collegename": student_user["collegename"]
             })
 
-            # Use `secure=False` for local development
+            # Use secure=False for local development
             response.set_cookie(
                 key='jwt',
                 value=tokens['jwt'],
@@ -98,7 +98,6 @@ def student_login(request):
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         return Response({"error": "An unexpected error occurred"}, status=500)
-
 
 @api_view(["POST"])
 @permission_classes([AllowAny])  # Allow signup without authentication
@@ -161,7 +160,7 @@ def student_profile(request):
             raise AuthenticationFailed("Authentication credentials were not provided.")
 
         # Decode the JWT token
-        try:
+        try: 
             decoded_token = jwt.decode(jwt_token, 'test', algorithms=["HS256"])
             # print(f"Decoded Token: {decoded_token}")
         except jwt.ExpiredSignatureError:
