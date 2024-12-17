@@ -34,7 +34,7 @@ const Library = () => {
                 padding: "2rem",
               }}
             >
-              <CodeIcon sx={{ fontSize: 64, color: "#00296B" }} />
+              <CodeIcon sx={{ fontSize: 64, color: "#FDC500" }} />
               <Typography
                 variant="h6"
                 sx={{ fontWeight: "bold", mt: 2, color: "#00296B" }}
@@ -94,7 +94,7 @@ const Library = () => {
                 variant="contained"
                 onClick={() => navigate("/library/mcq")}
                 
-                className="px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-colors"
+                className="px-4 py-2 bg-[#00296B] text-white rounded-lg hover:bg-blue-900 transition-colors"
 
               >
                 Go to MCQ Library

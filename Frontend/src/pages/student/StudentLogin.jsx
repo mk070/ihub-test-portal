@@ -17,7 +17,7 @@ const StudentLogin = ({ onLogin }) => {
   };
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); 
     try {
       const response = await axios.post('http://localhost:8000/api/student/login/', formData, {
         headers: { 'Content-Type': 'application/json' },
@@ -95,73 +95,6 @@ const StudentLogin = ({ onLogin }) => {
 };
 
 export default StudentLogin;
-
-
-
-// import React, { useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import axios from 'axios';
-// import { TextField, Button, Container, Typography, Alert } from '@mui/material';
-
-// const StudentLogin = ({ onLogin }) => {
-//   const [email, setEmail] = useState('');
-//   const [password, setPassword] = useState('');
-//   const [error, setError] = useState('');
-//   const navigate = useNavigate();
-
-//   const handleLogin = async () => {
-//     try {
-//       const response = await axios.post('http://localhost:8000/api/student/login/', {
-//         email,
-//         password,
-//       });
-
-//       // Assuming the response contains the studentId
-//       const { studentId } = response.data;
-
-//       // Store studentId in local storage
-//       localStorage.setItem('studentId', studentId);
-
-//       // Navigate to the student dashboard or profile
-//       navigate('/studentdashboard');
-
-//       // Call onLogin with the studentId
-//       onLogin(studentId);
-//     } catch (err) {
-//       setError('Login failed. Please check your credentials.');
-//     }
-//   };
-
-//   return (
-//     <Container maxWidth="sm">
-//       <Typography variant="h4" gutterBottom>
-//         Student Login
-//       </Typography>
-//       {error && <Alert severity="error">{error}</Alert>}
-//       <TextField
-//         fullWidth
-//         label="Email"
-//         value={email}
-//         onChange={(e) => setEmail(e.target.value)}
-//         margin="normal"
-//       />
-//       <TextField
-//         fullWidth
-//         label="Password"
-//         type="password"
-//         value={password}
-//         onChange={(e) => setPassword(e.target.value)}
-//         margin="normal"
-//       />
-//       <Button variant="contained" color="primary" onClick={handleLogin}>
-//         Login
-//       </Button>
-//     </Container>
-//   );
-// };
-
-// export default StudentLogin;
-
 
 
 

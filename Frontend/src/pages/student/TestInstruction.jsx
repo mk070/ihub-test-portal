@@ -80,12 +80,14 @@ const TestInstructions = () => {
     console.log("Test data received in TestInstructions:", test);
   }, [test]);
 
+
   const handleStartTest = async () => {
     const studentId = localStorage.getItem("studentId");
     if (!studentId) {
       alert("Student ID not found. Please log in again.");
       return;
     }
+
   
     try {
       await startTest(testId, studentId);
@@ -96,6 +98,7 @@ const TestInstructions = () => {
     } catch (error) {
       console.error("Error starting test:", error);
     }
+
   };
 
   const formatDate = (dateString) => {
