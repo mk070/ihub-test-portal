@@ -107,7 +107,8 @@ const StudentDashboard = () => {
                       starttime={test.starttime}
                       endtime={test.endtime}
                     />
-                  )): (
+                  ))
+                ) : (
                   <Box className="text-center">
                     <img
                       src={NoExams}
