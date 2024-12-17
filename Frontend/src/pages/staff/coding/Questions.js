@@ -1,12 +1,14 @@
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 
 const Questions = () => {
   const { contestId } = useParams(); // Extract contestId from the URL
   const navigate = useNavigate();
+  const location = useLocation();
+  const requiredQuestions = location.state?.requiredQuestions || 0;
 
   const handleNavigateToLibrary = () => {
-    navigate(`/${contestId}/QuestionsLibrary`);
+    navigate(`/${contestId}/QuestionsLibrary`, { state: { requiredQuestions } });
   };
 
   return (
@@ -17,7 +19,6 @@ const Questions = () => {
       </div>
 
       <h2 className="text-3xl font-semibold mb-6">Questions</h2>
-      
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div

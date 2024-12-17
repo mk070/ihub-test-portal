@@ -7,7 +7,7 @@ const TestCard = ({ test }) => {
   const [expanded, setExpanded] = useState(false);
 
   const handleCardClick = () => {
-    navigate(`/testinstructions/${test.contestId}`);
+    navigate(`/testinstructions/${test.contestId}`, { state: { test } }); // Pass the test data as state
   };
 
   const toggleExpand = () => {
@@ -47,7 +47,7 @@ const TestCard = ({ test }) => {
             <span style={{ color: "#10B981", fontSize: "2rem", marginLeft: "4px" }}>•</span>
           </Box>
         </Box>
-        
+
         {/* Display description with "More" option */}
         <Typography
           variant="body2"

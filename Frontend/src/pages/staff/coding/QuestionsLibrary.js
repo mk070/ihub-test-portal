@@ -18,7 +18,7 @@ import {
   InputLabel,
   TablePagination,
 } from "@mui/material";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const QuestionsLibrary = () => {
@@ -30,6 +30,8 @@ const QuestionsLibrary = () => {
   const [difficulty, setDifficulty] = useState("");
   const [selectedQuestions, setSelectedQuestions] = useState([]);
   const { contestId } = useParams();
+  const location = useLocation();
+  const requiredQuestions = location.state?.requiredQuestions || 0;
 
   // Pagination states
   const [page, setPage] = useState(0);
@@ -41,7 +43,7 @@ const QuestionsLibrary = () => {
         const response = await axios.get("http://localhost:8000/manualProblems/");
         setQuestions(response.data.problems);
         setFilteredQuestions(response.data.problems);
-  
+
         // Load previously selected questions from sessionStorage
         const storedQuestions = sessionStorage.getItem("selectedQuestions");
         if (storedQuestions) {
@@ -55,10 +57,9 @@ const QuestionsLibrary = () => {
         setLoading(false);
       }
     };
-  
+
     fetchQuestions();
   }, []);
-  
 
   useEffect(() => {
     let filtered = questions;
@@ -83,20 +84,27 @@ const QuestionsLibrary = () => {
   };
 
   const handleNext = () => {
+    console.log("Required Questions:", requiredQuestions);
+    console.log("Selected Questions:", selectedQuestions.length);
+    if (selectedQuestions.length < requiredQuestions) {
+      alert(`Please select at least ${requiredQuestions} questions.`);
+      return;
+    }
+
     const storedQuestions = sessionStorage.getItem("selectedQuestions");
     const previousSelectedQuestions = storedQuestions ? JSON.parse(storedQuestions) : [];
-  
+
     // Combine previously selected and newly selected questions
     const allSelectedQuestions = [
       ...previousSelectedQuestions,
       ...questions.filter((q) => selectedQuestions.includes(q.id)),
     ];
-  
+
     // Remove duplicates
     const uniqueSelectedQuestions = Array.from(
       new Map(allSelectedQuestions.map((q) => [q.id, q])).values()
     );
-  
+
     sessionStorage.setItem("selectedQuestions", JSON.stringify(uniqueSelectedQuestions));
     navigate(`/${contestId}/question-preview`);
   };
@@ -229,7 +237,7 @@ const QuestionsLibrary = () => {
             variant="contained"
             color="primary"
             onClick={handleNext}
-            disabled={selectedQuestions.length === 0}
+            disabled={selectedQuestions.length < requiredQuestions}
           >
             Next
           </Button>
