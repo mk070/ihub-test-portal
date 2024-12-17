@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
+import Loader from '../../../layout/Loader';
 
 const App = () => {
   const navigate = useNavigate(); // Initialize navigate function
@@ -7,13 +8,21 @@ const App = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(10);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
     // Fetch student data (replace with your API endpoint)
     fetch("http://127.0.0.1:8000/studentprofile/")
       .then((response) => response.json())
-      .then((data) => setStudents(data.students))
-      .catch((error) => console.error("Error fetching data:", error));
+      .then((data) => {
+        setStudents(data.students);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setIsLoading(false);
+      });
   }, []);
 
   // Get current students for pagination
@@ -119,64 +128,84 @@ const App = () => {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.header}>Student Profile Management</h1>
-
-      {selectedStudent ? (
-        <div style={styles.detailView}>
-          <h2>Student Details</h2>
-          <p><strong>Name:</strong> {selectedStudent.name}</p>
-          <p><strong>Email:</strong> {selectedStudent.email}</p>
-          <p><strong>College:</strong> {selectedStudent.collegename}</p>
-          <p><strong>Department:</strong> {selectedStudent.dept}</p>
-          <p><strong>Register Number:</strong> {selectedStudent.regno}</p>
-          <button style={styles.closeButton} onClick={closeDetails}>Close</button>
-        </div>
+      {isLoading ? (
+        <Loader />
       ) : (
         <>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.tableHeader}>Name</th>
-                <th style={styles.tableHeader}>Department</th>
-                <th style={styles.tableHeader}>College</th>
-                <th style={styles.tableHeader}>Register Number</th>
-                <th style={styles.tableHeader}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentStudents.map((student, index) => (
-                <tr
-                  key={index}
-                  style={styles.row}
-                >
-                  <td style={styles.tableCell}>{student.name}</td>
-                  <td style={styles.tableCell}>{student.dept}</td>
-                  <td style={styles.tableCell}>{student.collegename}</td>
-                  <td style={styles.tableCell}>{student.regno}</td>
-                  <td style={styles.tableCell}>
-                    <button 
-                      style={styles.viewButton} 
-                      onClick={() => viewStudentStats(student.regno)} // Changed to use new navigation function
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <h1 style={styles.header}>Student Profile Management</h1>
 
-          <div style={styles.pagination}>
-            {[...Array(Math.ceil(students.length / studentsPerPage)).keys()].map((number) => (
-              <button
-                key={number}
-                style={styles.pageButton}
-                onClick={() => paginate(number + 1)}
-              >
-                {number + 1}
+          {selectedStudent ? (
+            <div style={styles.detailView}>
+              <h2>Student Details</h2>
+              <p>
+                <strong>Name:</strong> {selectedStudent.name}
+              </p>
+              <p>
+                <strong>Email:</strong> {selectedStudent.email}
+              </p>
+              <p>
+                <strong>College:</strong> {selectedStudent.collegename}
+              </p>
+              <p>
+                <strong>Department:</strong> {selectedStudent.dept}
+              </p>
+              <p>
+                <strong>Register Number:</strong> {selectedStudent.regno}
+              </p>
+              <button style={styles.closeButton} onClick={closeDetails}>
+                Close
               </button>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <>
+              <table style={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={styles.tableHeader}>Name</th>
+                    <th style={styles.tableHeader}>Department</th>
+                    <th style={styles.tableHeader}>College</th>
+                    <th style={styles.tableHeader}>Register Number</th>
+                    <th style={styles.tableHeader}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentStudents.map((student, index) => (
+                    <tr
+                      key={index}
+                      style={styles.row}
+                    >
+                      <td style={styles.tableCell}>{student.name}</td>
+                      <td style={styles.tableCell}>{student.dept}</td>
+                      <td style={styles.tableCell}>{student.collegename}</td>
+                      <td style={styles.tableCell}>{student.regno}</td>
+                      <td style={styles.tableCell}>
+                        <button
+                          style={styles.viewButton}
+                          onClick={() => viewStudentStats(student.regno)}
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div style={styles.pagination}>
+                {[...Array(Math.ceil(students.length / studentsPerPage)).keys()].map(
+                  (number) => (
+                    <button
+                      key={number}
+                      style={styles.pageButton}
+                      onClick={() => paginate(number + 1)}
+                    >
+                      {number + 1}
+                    </button>
+                  )
+                )}
+              </div>
+            </>
+          )}
         </>
       )}
     </div>

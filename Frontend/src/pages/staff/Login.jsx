@@ -1,10 +1,17 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 export default function Login() {
   const navigate = useNavigate();
+  const [staffData, setStaffData] = useState({
+    full_name: "",
+    email: "",
+    department: "",
+    collegename: "",
+  });
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -19,7 +26,7 @@ export default function Login() {
       [name]: value
     }));
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -27,18 +34,62 @@ export default function Login() {
     try {
       const response = await axios.post(
         'http://localhost:8000/api/staff/login/',
-        formData,
         {
-          withCredentials: true, // Allow sending and storing cookies
+          email: formData.email,
+          password: formData.password,
+        },
+        {
+          withCredentials: true, // Allow sending and storing cookies if needed for server
         }
       );
-      localStorage.setItem('staffToken', response.data.tokens.access_token); // Store token if needed
+  
+      // Store response in cookies
+      Cookies.set('staffToken', response.data.tokens.access_token, { expires: 7 }); // Expires in 7 days
+      Cookies.set('username', response.data.name, { expires: 7 });
+  
       navigate('/staffdashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid email or password');
     }
-    
   };
+
+  const fetchStaffData = async () => {
+    try {
+      // Retrieve the JWT token from cookies
+      const token = Cookies.get('staffToken'); 
+  
+      // Check if the token exists
+      if (!token) {
+        console.error("No token found! Please login again.");
+        return;
+      }
+
+      // API call to fetch staff data
+      const response = await axios.get('http://localhost:8000/api/staff/profile/', {
+        withCredentials: true, // Include cookies if needed
+        headers: {
+          Authorization: `Bearer ${token}`, // Add JWT token to headers
+        },
+        
+      });
+
+      // Set the staff data
+      const { full_name, email, department, collegename } = response.data;
+      setStaffData({
+        full_name,
+        email,
+        department,
+        collegename,
+      });
+    } catch (err) {
+      console.error('Error fetching staff data:', err.response?.data || err.message);
+    }
+  };
+
+  // Fetch staff data on component mount
+  useEffect(() => {
+    fetchStaffData();
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-yellow-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -117,4 +168,3 @@ export default function Login() {
     </div>
   );
 }
-    
