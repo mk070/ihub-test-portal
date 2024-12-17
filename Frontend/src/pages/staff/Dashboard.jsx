@@ -25,24 +25,39 @@ const Dashboard = () => {
 
   // Fetch stats and tests dynamically
   useEffect(() => {
-    api.get('/api/contests/live?type=all')
-      .then((response) => {
-        const contests = response.data?.contests || []; // Safe access to response data
-        setTests(contests);
 
-        // Aggregate statistics
-        const created = contests.length;
-        const students = contests.reduce((acc, contest) => acc + (contest.register || 0), 0);
-        const liveTests = contests.filter((contest) => contest.status === 'Live').length;
-        const completedTests = contests.reduce((acc, contest) => acc + (contest.complete || 0), 0);
+    // Parallel API calls for contests and student stats
+    Promise.all([
+      api.get('/api/contests/live?type=all'),
+      api.get('/api/student-stats')
+    ])
+    .then(([contestResponse, studentStatsResponse]) => {
+      const contests = contestResponse.data.contests || [];
+      setTests(contests);
 
-        setStats({ created, students, liveTests, completedTests });
-      })
-      .catch((error) => {
-        console.error('Error fetching contests:', error);
-        setTests([]); // Reset tests on error
+      const created = contests.length;
+      const liveTests = contests.filter((contest) => contest.status === 'Live').length;
+      const completedTests = contests.filter((contest) => 
+        contest.status === 'Completed' || 
+        (contest.testEndDate && new Date(contest.testEndDate) < new Date())
+      ).length;
+
+      // Get total students from the new API endpoint
+      const totalStudents = studentStatsResponse.data.total_students || 0;
+
+      setStats({ 
+        created, 
+        students: totalStudents, 
+        liveTests, 
+        completedTests 
       });
-  }, []);
+    })
+    .catch((error) => {
+      console.error('Error fetching data:', error);
+      // Optional: Add error handling for the user
+    });
+  }, []);
+
 
   const handleModalOpen = () => setIsModalOpen(true);
   const handleModalClose = () => setIsModalOpen(false);
@@ -79,6 +94,7 @@ const Dashboard = () => {
 
         {/* Test Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
           {tests.map((test) => {
             const title = test.assessmentName || 'Unnamed Contest';
             const type = test.type || 'General';
@@ -106,6 +122,7 @@ const Dashboard = () => {
               />
             );
           })}
+
         </div>
       </div>
 
