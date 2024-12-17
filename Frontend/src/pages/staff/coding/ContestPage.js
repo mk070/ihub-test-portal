@@ -9,7 +9,7 @@ import Buttons from '../../../components/staff/coding/Buttons';
 import TestcaseResults from '../../../components/staff/coding/TestcaseResults';
 
 function ContestPage() {
-  const { testId } = useParams(); // Get testId from URL parameters
+  const { contestId } = useParams(); // Get contestId from URL parameters
   const [selectedProblemId, setSelectedProblemId] = useState(1);
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("python");
@@ -89,7 +89,7 @@ function ContestPage() {
         console.log("Media stream stopped.");
       }
     };
-  }, [language, testId]);
+  }, [language, contestId]);
 
   // Handle problem selection
   const handleProblemSelect = (problemId) => {
@@ -150,7 +150,7 @@ const handleFinish = async () => {
     // Log the test as "completed" via API
     const studentId = localStorage.getItem("studentId");
     await axios.post("http://localhost:8000/api/finish_test/", {
-      contest_id: testId,
+      contest_id: contestId,
       student_id: studentId,
     });
 

@@ -1,20 +1,53 @@
-import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button, Typography, Box, Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import axios from "axios";
+import testImage from "../../assets/instruction.png";
+import ProblemDetails from "../../components/staff/coding/ProblemDetails";  // Import ProblemDetails component
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  maxWidth: 700,
+  padding: theme.spacing(5),
   width: "100%",
   backgroundColor: theme.palette.background.default,
-  boxShadow: theme.shadows[3],
+  boxShadow: theme.shadows[10],
   borderRadius: theme.shape.borderRadius,
+  position: 'relative',
+  maxWidth: 'none',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+}));
+
+const HeaderContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  width: '100%',
+  marginBottom: theme.spacing(4),
+}));
+
+const ImageContainer = styled(Box)(({ theme }) => ({
+  marginRight: theme.spacing(4),
+}));
+
+const TextContainer = styled(Box)(({ theme }) => ({
+  textAlign: 'center',
+  paddingLeft: '40%',
+  width: '100%',
+}));
+
+const SectionContainer = styled(Box)(({ theme }) => ({
+  marginTop: theme.spacing(9),
+  width: '100%',
+  display: 'flex',
+  justifyContent: 'space-between',
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  marginTop: theme.spacing(3),
+  position: "absolute",
+  bottom: theme.spacing(2), 
+  right: theme.spacing(2),
   padding: theme.spacing(1.5, 4),
   fontSize: "1rem",
   fontWeight: "bold",
@@ -25,13 +58,13 @@ const StyledButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const startTest = async (contestId, studentId) => {
+const startTest = async (contestid, studentId) => {
   try {
     const response = await axios.post('http://localhost:8000/api/start_test/', {
-      contest_id: contestId,
+      contest_id: contestid,
       student_id: studentId,
     });
-    console.log(response.data.message);
+    console.log("Fetched from API:", response.data.message);
   } catch (error) {
     console.error("Error starting test:", error);
   }
@@ -39,17 +72,38 @@ const startTest = async (contestId, studentId) => {
 
 const TestInstructions = () => {
   const navigate = useNavigate();
-  const { testId } = useParams(); // Get test ID from route params
+  const location = useLocation();
+  const { test } = location.state || {}; // Retrieve test data from state
+  const { testId } = useParams(); // Retrieve testId from route params
+
+  useEffect(() => {
+    console.log("Test data received in TestInstructions:", test);
+  }, [test]);
+
 
   const handleStartTest = async () => {
-    const studentId = localStorage.getItem("studentId"); // Retrieve student ID
+    const studentId = localStorage.getItem("studentId");
     if (!studentId) {
       alert("Student ID not found. Please log in again.");
       return;
     }
 
-    await startTest(testId, studentId); // Log test as started
-    navigate(`/contest/${testId}`); // Navigate to the contest page
+  
+    try {
+      await startTest(testId, studentId);
+      // Pass contest_id and student_id dynamically via 'state'
+      navigate(`/contest/${testId}`, { 
+        state: { contest_id: testId, student_id: studentId }
+      });
+    } catch (error) {
+      console.error("Error starting test:", error);
+    }
+
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString();
   };
 
   return (
@@ -58,36 +112,59 @@ const TestInstructions = () => {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      minHeight="100vh"
+      minHeight="10vh"
       padding={2}
       bgcolor="background.paper"
+      width="75%"
+      margin="auto"
     >
       <StyledPaper>
-        <Typography variant="h4" gutterBottom align="center" color="textPrimary">
-          Test Instructions
-        </Typography>
-        <Typography variant="body1" paragraph color="textSecondary">
-          Please read the following instructions carefully before starting the test:
-        </Typography>
-        <Typography variant="body2" paragraph color="textSecondary">
-          1. Ensure you have a stable internet connection.
-        </Typography>
-        <Typography variant="body2" paragraph color="textSecondary">
-          2. The test is timed and will automatically submit when the time is up.
-        </Typography>
-        <Typography variant="body2" paragraph color="textSecondary">
-          3. Do not refresh the page during the test.
-        </Typography>
-        <Typography variant="body2" paragraph color="textSecondary">
-          4. Make sure to save your answers frequently.
-        </Typography>
-        <Typography variant="body2" paragraph color="textSecondary">
-          5. Contact support if you face any issues.
-        </Typography>
-        <Box display="flex" justifyContent="center">
-          <StyledButton variant="contained" onClick={handleStartTest}>
+        <HeaderContainer>
+          <ImageContainer>
+            <img src={testImage} alt="Test Image" style={{ width: '600px', height: 'auto', position: 'absolute' }} />
+          </ImageContainer>
+        </HeaderContainer>
+        <TextContainer mt={10}>
+          <Typography variant="h4" gutterBottom color="textPrimary">
+            {test?.name || "Test Name"}
+          </Typography>
+          <Typography variant="subtitle1" gutterBottom color="textSecondary">
+            {/* {test?.assessmentOverview?.description || "Test Description"} */}
+          </Typography>
+          <Typography variant="body1" paragraph color="textSecondary">
+            Registration Start Date: {test?.starttime ? formatDate(test.starttime) : "N/A"}
+          </Typography>
+          <Typography variant="body1" paragraph color="textSecondary">
+            Registration End Date: {test?.endtime ? formatDate(test.endtime) : "N/A"}
+          </Typography>
+        </TextContainer>
+
+        <SectionContainer>
+          {/* Additional sections */}
+        </SectionContainer>
+
+        <Box mt={20} width="100%">
+          <Typography variant="h5" gutterBottom align="left" color="textPrimary">
+            All that you need to know about Assessment
+          </Typography>
+          <Typography variant="body1" paragraph color="textSecondary">
+            {test?.description || "N/A"}
+          </Typography>
+
+          {/* Pass the problems to the ProblemDetails component */}
+          {test?.problems && (
+            <ProblemDetails selectedProblemId={test.problems[0]?.id} problems={test.problems} />
+          )}
+
+          <StyledButton onClick={handleStartTest}>
             Start Test
           </StyledButton>
+        </Box>
+
+        <Box mt={4}>
+          <Typography variant="body2" color="textSecondary">
+            By clicking on "Start Test", you agree to our terms and conditions.
+          </Typography>
         </Box>
       </StyledPaper>
     </Box>

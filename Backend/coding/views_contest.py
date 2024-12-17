@@ -109,10 +109,15 @@ def saveUserInfo(request):
 
     return JsonResponse({"error": "Invalid request method."}, status=405)
 
+import os
+import json
+
+
 @csrf_exempt
 def start_test(request):
     if request.method == "POST":
         try:
+            # Parse request data
             data = json.loads(request.body)
             contest_id = data.get("contest_id")
             student_id = data.get("student_id")
@@ -126,7 +131,18 @@ def start_test(request):
                 {"$set": {"status": "started", "start_time": datetime.utcnow()}},
                 upsert=True
             )
-            return JsonResponse({"message": "Test started successfully."}, status=200)
+
+            # Fetch problems for the provided contest_id
+            coding_assessment = db.coding_assessments.find_one({"contestId": contest_id})
+            if not coding_assessment:
+                return JsonResponse({"error": "No problems found for this contest_id"}, status=404)
+
+            # Extract only the problems field from the assessment data
+            problems = coding_assessment.get("problems", [])
+
+            # Send the problems as JSON response
+            return JsonResponse({"message": "Test started successfully.", "problems": problems}, status=200)
+
         except Exception as e:
             return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
 

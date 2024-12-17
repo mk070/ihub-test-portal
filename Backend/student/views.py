@@ -43,7 +43,7 @@ def generate_tokens_for_student(student_id, regno):
 def student_login(request):
     """
     Login view for students
-    """
+    """ 
     try:
         data = request.data
         email = data.get("email")
@@ -79,7 +79,7 @@ def student_login(request):
                 "collegename": student_user["collegename"]
             })
 
-            # Use `secure=False` for local development
+            # Use secure=False for local development
             response.set_cookie(
                 key='jwt',
                 value=tokens['jwt'],
@@ -98,7 +98,6 @@ def student_login(request):
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         return Response({"error": "An unexpected error occurred"}, status=500)
-
 
 @api_view(["POST"])
 @permission_classes([AllowAny])  # Allow signup without authentication
@@ -161,7 +160,7 @@ def student_profile(request):
             raise AuthenticationFailed("Authentication credentials were not provided.")
 
         # Decode the JWT token
-        try:
+        try: 
             decoded_token = jwt.decode(jwt_token, 'test', algorithms=["HS256"])
             # print(f"Decoded Token: {decoded_token}")
         except jwt.ExpiredSignatureError:
@@ -216,7 +215,8 @@ def get_students(request):
 @permission_classes([AllowAny])  # Allow unauthenticated access for testing
 def get_tests_for_student(request):
     """
-    API to fetch tests assigned to a student based on regno from JWT.
+    API to fetch tests assigned to a student based on regno from JWT,
+    including the entire document.
     """
     try:
         # Retrieve the JWT token from cookies
@@ -239,27 +239,28 @@ def get_tests_for_student(request):
 
         # Fetch contests where the student is visible in `visible_to`
         contests = list(coding_assessments_collection.find(
-            {"visible_to": regno},
-            {
-                "_id": 0,
-                "assessmentName": 1,
-                "startDate": 1,
-                "endDate": 1,
-                "guidelines": 1,
-                "contestId": 1,
-                "problems.title": 1,
-                "problems.level": 1,
-                "problems.problem_statement": 1,
-            }
+            {"visible_to": regno}  # Filter only on 'visible_to'
         ))
 
         if not contests:
             return JsonResponse([], safe=False, status=200)  # Return an empty list if no contests are found
 
-        return JsonResponse(contests, safe=False, status=200)
+        # Convert ObjectId to string for JSON compatibility and format response
+        formatted_response = [
+            {
+                **contest,  # Spread the entire contest object
+                "_id": str(contest["_id"]),  # Convert _id (ObjectId) to string
+            }
+            for contest in contests
+        ]
+
+        return JsonResponse(formatted_response, safe=False, status=200)
 
     except AuthenticationFailed as auth_error:
         return JsonResponse({"error": str(auth_error)}, status=401)
     except Exception as e:
         print("Error fetching tests for student:", str(e))
         return JsonResponse({"error": "Failed to fetch tests"}, status=500)
+
+
+
