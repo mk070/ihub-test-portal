@@ -58,10 +58,10 @@ const StyledButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const startTest = async (contestid, studentId) => {
+const startTest = async (concontestId, studentId) => {
   try {
     const response = await axios.post('http://localhost:8000/api/start_test/', {
-      contest_id: contestid,
+      contest_id: concontestId,
       student_id: studentId,
     });
     console.log("Fetched from API:", response.data.message);
@@ -74,7 +74,7 @@ const TestInstructions = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { test } = location.state || {}; // Retrieve test data from state
-  const { testId } = useParams(); // Retrieve testId from route params
+  const { contestId } = useParams(); // Retrieve contestId from route params
 
   useEffect(() => {
     console.log("Test data received in TestInstructions:", test);
@@ -90,10 +90,10 @@ const TestInstructions = () => {
 
   
     try {
-      await startTest(testId, studentId);
+      await startTest(contestId, studentId);
       // Pass contest_id and student_id dynamically via 'state'
-      navigate(`/contest/${testId}`, { 
-        state: { contest_id: testId, student_id: studentId }
+      navigate(`/contest/${contestId}`, { 
+        state: { contest_id: contestId, student_id: studentId }
       });
     } catch (error) {
       console.error("Error starting test:", error);
