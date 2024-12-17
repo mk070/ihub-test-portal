@@ -11,6 +11,8 @@ import mcq from '../../assets/mcq.png';
 import code from '../../assets/code.png';
 import api from '../../axiosConfig';
 import { useNavigate } from 'react-router-dom';
+import Loader from '../../layout/Loader';
+
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -22,6 +24,7 @@ const Dashboard = () => {
   });
   const [tests, setTests] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Fetch stats and tests dynamically
   useEffect(() => {
@@ -50,6 +53,8 @@ const Dashboard = () => {
         liveTests, 
         completedTests 
       });
+      setIsLoading(false)
+
     })
     .catch((error) => {
       console.error('Error fetching data:', error);
@@ -90,6 +95,9 @@ const Dashboard = () => {
         </div>
 
         {/* Test Cards Grid */}
+        {isLoading ? (
+            <Loader />
+          ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {tests.map((test) => (
             <TestCard
@@ -109,6 +117,7 @@ const Dashboard = () => {
             />
           ))}
         </div>
+        )}
       </div>
 
       {/* Modal for Create Test */}
