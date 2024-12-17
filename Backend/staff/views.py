@@ -94,6 +94,7 @@ def staff_login(request):
             value=tokens['jwt'],
             httponly=True,
             samesite='Lax',
+            path="/",      # Ensure the cookie is sent for all routes
             secure=os.getenv("ENV") == "production",
             max_age=1 * 24 * 60 * 60  # 1 day expiration
         )
@@ -355,51 +356,6 @@ def fetch_contests(request):
         return Response({"error": "Something went wrong. Please try again later."}, status=500)
 
 
-# @api_view(["GET"])
-# @permission_classes([AllowAny])  # Allow access without authentication
-# @authentication_classes([])
-# def get_staff_profile(request):
-#     """
-#     Get staff profile using the staff_user object ID from the JWT token.
-#     """
-#     try:
-#         # Retrieve JWT token from cookies or headers
-#         jwt_token = request.COOKIES.get("jwt")  # Or use request.headers.get('Authorization')
-#         if not jwt_token:
-#             raise AuthenticationFailed("Authentication credentials were not provided.")
-
-#         try:
-#             decoded_token = jwt.decode(jwt_token, 'test', algorithms=["HS256"])
-#         except jwt.ExpiredSignatureError:
-#             raise AuthenticationFailed("Access token has expired. Please log in again.")
-#         except jwt.InvalidTokenError:
-#             raise AuthenticationFailed("Invalid token. Please log in again.")
-        
-#         staff_id = decoded_token.get("staff_user")
-
-#         if not staff_id:
-#             raise AuthenticationFailed("Invalid token payload.")
-
-#         # Fetch the staff details from MongoDB using ObjectId
-#         staff = staff_collection.find_one({"_id": ObjectId(staff_id)})
-
-#         if not staff:
-#             return Response({"error": "Staff not found"}, status=404)
-
-#         # Return staff details
-#         staff_details = {
-#             "name": staff.get("full_name"),
-#             "email": staff.get("email"),
-#             "department": staff.get("department"),
-#             "collegename": staff.get("collegename"),
-#         }
-
-#         return Response(staff_details, status=200)
-#     except AuthenticationFailed as auth_error:
-#         return Response({"error": str(auth_error)}, status=401)
-#     except Exception as e:
-#         print(f"Unexpected error in student_profile: {e}")
-#         return Response({"error": "An unexpected error occurred"}, status=500)
 
 @api_view(["GET", "PUT"])  # Allow both GET and PUT requests
 @permission_classes([AllowAny])
