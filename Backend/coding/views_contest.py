@@ -116,7 +116,7 @@ def start_test(request):
             data = json.loads(request.body)
             contest_id = data.get("contest_id")
             student_id = data.get("student_id")
-
+            print(contest_id)
             if not contest_id or not student_id:
                 return JsonResponse({"error": "contest_id and student_id are required"}, status=400)
 
