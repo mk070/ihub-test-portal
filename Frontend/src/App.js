@@ -32,7 +32,7 @@ import BulkUpload from "./pages/staff/coding/BulkUpload";
 import StaffStudentProfile from './pages/staff/coding/StaffStudentProfile';
 import StudentStats from './pages/staff/coding/studentstats';
 import Mcq from './pages/staff/mcq/Mcq';
-import ViewTest from './pages/staff/coding/Viewtest';
+import ViewTest from './pages/staff/coding/ViewTest';
 import StaffProfile from './pages/staff/StaffProfile';
 
 

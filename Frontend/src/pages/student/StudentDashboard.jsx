@@ -10,7 +10,7 @@ const StyledTabs = styled(Tabs)({
   "& .MuiTabs-indicator": {
     backgroundColor: "#D97706", // Yellow underline for active tab
   },
-}); 
+});
 
 const StyledTab = styled(Tab)({
   textTransform: "none",
@@ -29,11 +29,11 @@ const StudentDashboard = () => {
     name: "",
     regno: "",
   });
- 
+
   // Fetch student data and tests
   const fetchStudentData = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/student/profile/", {
+      const response = await axios.get(`"http://localhost:8000/api/student/profile/"`, {
         withCredentials: true, // Include cookies for authentication
       });
 
@@ -107,7 +107,8 @@ const StudentDashboard = () => {
                       starttime={test.starttime}
                       endtime={test.endtime}
                     />
-                  )): (
+                  ))
+                ) : (
                   <Box className="text-center">
                     <img
                       src={NoExams}

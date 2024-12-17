@@ -178,135 +178,89 @@ def fetch_student_stats(request):
     except Exception as e:
         logger.error(f"Error fetching student stats: {e}")
         return Response({"error": "Something went wrong. Please try again later."}, status=500)
-    
+
+#Admin test
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def fetch_contests(request):
-    """ 
-    Fetch live or all contests from MongoDB based on query parameters.
-    Handles two different collection structures.
+    """
+    Fetch contests created by the logged-in admin from MongoDB.
+    Filters contests using staff_user from the JWT token.
     """
     try:
-        contest_type = request.query_params.get('type', 'live')
+        jwt_token = request.COOKIES.get("jwt")
+        if not jwt_token:
+            raise AuthenticationFailed("Authentication credentials were not provided.")
+
+        # Decode JWT token
+        try:
+            decoded_token = jwt.decode(jwt_token, 'test', algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Access token has expired. Please log in again.")
+        except jwt.InvalidTokenError:
+            raise AuthenticationFailed("Invalid token. Please log in again.")
+        
+        staff_id = decoded_token.get("staff_user")
+        print("Decoded staff_id:", staff_id)
+
+        if not staff_id:
+            raise AuthenticationFailed("Invalid token payload.")
+
+        # Connect to the MongoDB collection
         coding_assessments = db['coding_assessments']
-        current_time = datetime.utcnow().replace(tzinfo=timezone.utc)  # Ensure UTC timezone for consistency
-        current_date = current_time.date()  # Extract only the current date
+        current_time = datetime.utcnow().replace(tzinfo=timezone.utc)
+        current_date = current_time.date()
 
-        # Base query to match assessment documents
-        base_query = {}
-
-        # Add time-based filters for live contests
-        if contest_type == 'live':
-            base_query.update({
-                "$or": [
-                    # Structure 1: Direct startDate and endDate
-                    {
-                        "startDate": {"$lte": current_time},
-                        "endDate": {"$gte": current_time}
-                    },
-                    # Structure 2: Registration-based filtering
-                    {
-                        "assessmentOverview.registrationStart": {"$lte": current_time},
-                        "$or": [
-                            {"assessmentOverview.registrationEnd": {"$gte": current_time}},
-                            {"assessmentOverview.registrationEnd": None}
-                        ]
-                    }
-                ]
-            })
-
-        contests_cursor = coding_assessments.find(base_query)
+        # Fetch all documents (unfiltered initially)
+        contests_cursor = coding_assessments.find()
         contests = []
 
+        # Process and filter the results manually
         for contest in contests_cursor:
-            try:
-                # Determine which structure we're dealing with
-                if "assessmentOverview" in contest:
-                    # Structure 2
-                    start_date = contest.get("assessmentOverview", {}).get("registrationStart")
-                    end_date = contest.get("assessmentOverview", {}).get("registrationEnd")
-                    assessment_name = contest.get("assessmentOverview", {}).get("name", "Unnamed Contest")
-                    guidelines = contest.get("assessmentOverview", {}).get("guidelines", [])
-                    
-                    # Get the test configuration
-                    test_config = contest.get("testConfiguration", {})
-                    
-                    # Get the number of problems
-                    problems_count = len(contest.get("problems", []))
+            if contest.get("staffId") == staff_id:  # Match staffId with staff_id
+                start_date = contest.get("startDate")
+                end_date = contest.get("endDate")
 
-                    # Updated logic for status determination
-                    if start_date and end_date:
-                        start_date_only = start_date.date()  # Extract only the date
-                        end_date_only = end_date.date()
-
-                        if current_date < start_date_only:
-                            status = "Upcoming"
-                        elif start_date_only <= current_date <= end_date_only:
-                            status = "Live"
-                        elif current_date > end_date_only:
-                            status = "Completed"
+                # Determine the status of the contest
+                if start_date and end_date:
+                    start_date_only = start_date.date()
+                    end_date_only = end_date.date()
+                    if current_date < start_date_only:
+                        status = "Upcoming"
+                    elif start_date_only <= current_date <= end_date_only:
+                        status = "Live"
                     else:
-                        status = "Upcoming"  # Fallback status if dates are incomplete
-
-                    contests.append({
-                        "_id": str(contest.get("_id", "")),
-                        "contestId": contest.get("contestId", ""),
-                        "assessmentName": assessment_name,
-                        "type": "Coding",
-                        "category": "Technical",
-                        "startDate": start_date,
-                        "endDate": end_date,
-                        "duration": test_config.get("duration", ""),
-                        "guidelines": guidelines,
-                        "assigned": len(contest.get("visible_to", [])),
-                        "register": contest.get("register", 0),
-                        "complete": contest.get("complete", 0),
-                        "totalQuestions": problems_count,
-                        "status": status
-                    })
+                        status = "Completed"
                 else:
-                    # Structure 1
-                    start_date = contest.get("startDate")
-                    end_date = contest.get("endDate")
+                    status = "Upcoming"  # Fallback status
 
-                    # Updated logic for status determination
-                    if start_date and end_date:
-                        start_date_only = start_date.date()
-                        end_date_only = end_date.date()
-
-                        if current_date < start_date_only:
-                            status = "Upcoming"
-                        elif start_date_only <= current_date <= end_date_only:
-                            status = "Live"
-                        elif current_date > end_date_only:
-                            status = "Completed"
-                    else:
-                        status = "Upcoming"  # Fallback status if dates are incomplete
-
-                    contests.append({
-                        "_id": str(contest.get("_id", "")),
-                        "contestId": contest.get("contestId", ""),
-                        "assessmentName": contest.get("assessmentName", "Unnamed Contest"),
-                        "type": "Coding",
-                        "category": "Technical",
-                        "startDate": start_date,
-                        "endDate": end_date,
-                        "guidelines": contest.get("guidelines", []),
-                        "status": status
-                    })
-
-            except Exception as e:
-                logger.error(f"Error processing contest {contest.get('_id', 'unknown')}: {e}")
-                continue
+                # Append only the matched document
+                contests.append({
+                    "_id": str(contest.get("_id", "")),
+                    "contestId": contest.get("contestId", ""),
+                    "assessmentName": contest.get("assessmentOverview", {}).get("name", "Unnamed Contest"),
+                    "type": "Coding",
+                    "category": "Technical",
+                    "startDate": start_date,
+                    "endDate": end_date,
+                    "status": status,
+                })
 
         return Response({
             "contests": contests,
             "total": len(contests)
         })
 
-    except Exception as e:  
+    except jwt.ExpiredSignatureError:
+        return Response({"error": "Token has expired"}, status=401)
+    except jwt.InvalidTokenError:
+        return Response({"error": "Invalid token"}, status=401)
+    except Exception as e:
         logger.error(f"Error fetching contests: {e}")
         return Response({"error": "Something went wrong. Please try again later."}, status=500)
+
+
+
     
 #View_Test 
 @csrf_exempt
@@ -347,3 +301,77 @@ def contest_details(request, contestID):
             return JsonResponse({"error": "Contest not found"}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+    
+@api_view(["GET", "PUT"])  # Allow both GET and PUT requests
+@permission_classes([AllowAny])
+@authentication_classes([])
+def get_staff_profile(request):
+    """
+    GET: Retrieve staff profile using the JWT token.
+    PUT: Update staff profile details.
+    """
+    try:
+        jwt_token = request.COOKIES.get("jwt")
+        if not jwt_token:
+            raise AuthenticationFailed("Authentication credentials were not provided.")
+
+        # Decode JWT token
+        try:
+            decoded_token = jwt.decode(jwt_token, 'test', algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Access token has expired. Please log in again.")
+        except jwt.InvalidTokenError:
+            raise AuthenticationFailed("Invalid token. Please log in again.")
+        
+        staff_id = decoded_token.get("staff_user")
+
+
+        if not staff_id:
+            raise AuthenticationFailed("Invalid token payload.")
+
+        # Fetch the staff details from MongoDB using ObjectId
+        staff = staff_collection.find_one({"_id": ObjectId(staff_id)})
+
+        if not staff:
+            return Response({"error": "Staff not found"}, status=404)
+
+        # Handle GET request
+        if request.method == "GET":
+            staff_details = {
+                "name": staff.get("full_name"),
+                "email": staff.get("email"),
+                "department": staff.get("department"),
+                "collegename": staff.get("collegename"),
+            }
+            return Response(staff_details, status=200)
+
+        # Handle PUT request
+        if request.method == "PUT":
+            data = request.data  # Extract new data from request body
+            updated_data = {}
+
+            # Update fields if they are provided
+            if "name" in data:
+                updated_data["full_name"] = data["name"]
+            if "email" in data:
+                updated_data["email"] = data["email"]
+            if "department" in data:
+                updated_data["department"] = data["department"]
+            if "collegename" in data:
+                updated_data["collegename"] = data["collegename"]
+
+            if updated_data:
+                # Update the document in the database
+                staff_collection.update_one(
+                    {"_id": ObjectId(staff_id)},
+                    {"$set": updated_data}
+                )
+                return Response({"message": "Profile updated successfully"}, status=200)
+
+            return Response({"error": "No fields provided for update"}, status=400)
+
+    except AuthenticationFailed as auth_error:
+        return Response({"error": str(auth_error)}, status=401)
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return Response({"error": "An unexpected error occurred"}, status=500)

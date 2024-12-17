@@ -25,7 +25,7 @@ urlpatterns = [
     # path("get_students/", get_students, name="get_students"),
 
     # Dashboard
-    path('api/contests/live', fetch_contests, name='fetch_contests'),
+    path('contests/', fetch_contests, name='fetch_contests'),
     # Assessment API
     path('api/create-assessment/', create_assessment, name='create_assessment'),
 
