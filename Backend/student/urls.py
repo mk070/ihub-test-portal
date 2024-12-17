@@ -7,4 +7,6 @@ urlpatterns = [
     path("profile/", student_profile, name="student_profile"),
     path("", get_students, name="get_students"),
     path("tests", get_tests_for_student, name="get_open_tests"),
+    # path("tests/", student_tests, name="student_tests"),
+
 ]

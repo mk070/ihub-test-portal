@@ -106,7 +106,7 @@ const startTest = async (contestid, studentId) => {
 
 const TestInstructions = () => {
   const navigate = useNavigate();
-  const { testId } = useParams(); // Get test ID from route params
+  const { contestId } = useParams(); // Get test ID from route params
 
   const handleStartTest = async () => {
     const studentId = localStorage.getItem("studentId"); // Retrieve student ID
@@ -115,8 +115,8 @@ const TestInstructions = () => {
       return;
     }
 
-    await startTest(testId, studentId); // Log test as started
-    navigate(`/contest/${testId}`); // Navigate to the contest page
+    await startTest(contestId, studentId); // Log test as started
+    navigate(`/contest/${contestId}`); // Navigate to the contest page
   };
 
   const features = [

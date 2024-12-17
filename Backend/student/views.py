@@ -13,7 +13,6 @@ from django.http import JsonResponse
 from rest_framework import status
 from datetime import datetime, timedelta
 import jwt
-from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
 
@@ -263,5 +262,6 @@ def get_tests_for_student(request):
     except Exception as e:
         print("Error fetching tests for student:", str(e))
         return JsonResponse({"error": "Failed to fetch tests"}, status=500)
+
 
 

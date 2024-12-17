@@ -32,6 +32,8 @@ import BulkUpload from "./pages/staff/coding/BulkUpload";
 import StaffStudentProfile from './pages/staff/coding/StaffStudentProfile';
 import StudentStats from './pages/staff/coding/studentstats';
 import Mcq from './pages/staff/mcq/Mcq';
+import ViewTest from './pages/staff/coding/ViewTest';
+
 
 
 // Layout component for wrapping student routes
@@ -97,13 +99,14 @@ function App() {
            <Route path="/studentstats/:regno" element={<StudentStats />} /> 
            <Route path="/viewcontest/:contestId" element={<ViewContest />} />
           <Route path="/:contestId/question-preview" element={<QuestionPreview />} />
+          <Route path="/viewtest/:contestId" element={<ViewTest />} />
 
           <Route path="/library/coding" element={<QuestionDashboard />} />
           <Route path="/BulkUpload" element={<BulkUpload />} />
 
         </Route>
-        <Route path="/testinstructions/:testId" element={<TestInstructions />} />
-        <Route path="/Contest/:testId" element={<ContestPage />} />
+        <Route path="/testinstructions/:contestId" element={<TestInstructions />} />
+        <Route path="/Contest/:contestId" element={<ContestPage />} />
 
         {/* New View Contest Route */}
       </Routes>
