@@ -633,19 +633,13 @@ const [formData, setFormData] = useState({
                   Edit
                 </button>
                 <button
-                  onClick={() => {
-                    handleDelete(selectedQuestion.question_id);
-                    setShowConfirm(false);
-                    setSelectedQuestion(null);
-                    window.location.reload();
-                    setTimeout(() => {
-                      navigate("/library/mcq");
-                    }, 100);
-                  }}
-                  className="flex-1 text-red-600 bg-red-100 hover:bg-red-200 px-6 py-3 rounded-lg transition"
-                >
-                  Delete
-                </button>
+  onClick={() => {
+    setShowConfirm(true); // Show the confirmation modal
+  }}
+  className="flex-1 text-red-600 bg-red-100 hover:bg-red-200 px-6 py-3 rounded-lg transition"
+>
+  Delete
+</button>
               </>
             )}
           </div>
@@ -653,36 +647,39 @@ const [formData, setFormData] = useState({
       </div>
     </div>
 
-    {/* Confirmation Modal */}
     {showConfirm && (
-      <div
-        role="dialog"
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      >
-        <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-md">
-          <p className="text-lg font-semibold">Are you sure you want to delete this question?</p>
-          <p className="text-sm text-gray-600 mt-2">This action cannot be undone.</p>
-          <div className="flex justify-center gap-4 mt-6">
-            <button
-              onClick={() => {
-                handleDelete(selectedQuestion.question_id);
-                setShowConfirm(false);
-                setSelectedQuestion(null);
-              }}
-              className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition flex-1"
-            >
-              Confirm
-            </button>
-            <button
-              onClick={() => setShowConfirm(false)}
-              className="bg-gray-300 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-400 transition flex-1"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+  <div
+    role="dialog"
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+  >
+    <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-md">
+      <p className="text-lg font-semibold">Are you sure you want to delete this question?</p>
+      <p className="text-sm text-gray-600 mt-2">This action cannot be undone.</p>
+      <div className="flex justify-center gap-4 mt-6">
+        <button
+          onClick={() => {
+            handleDelete(selectedQuestion.question_id); // Perform delete action
+            setShowConfirm(false); // Close modal
+            window.location.reload();
+            setSelectedQuestion(null);
+            setTimeout(() => {
+              navigate("/library/mcq"); // Redirect to library page
+            }, 100);
+          }}
+          className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition flex-1"
+        >
+          Confirm
+        </button>
+        <button
+          onClick={() => setShowConfirm(false)} // Close modal without deleting
+          className="bg-gray-300 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-400 transition flex-1"
+        >
+          Cancel
+        </button>
       </div>
-    )}
+    </div>
+  </div>
+)}
   </div>
 )}
 
