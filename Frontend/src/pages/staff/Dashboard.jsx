@@ -1,15 +1,12 @@
-
-// Dashboard.jsx
-
 import React, { useState, useEffect } from 'react';
 import { FaChartBar, FaUsers, FaClipboardList, FaCheckCircle } from 'react-icons/fa';
-import StatsCard from '../../components/staff/StatsCard';
-import TestCard from '../../components/staff/TestCard';
 import { Dialog, DialogTitle, DialogContent, IconButton, DialogActions, Typography, Grid, Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import StatsCard from '../../components/staff/StatsCard';
+import TestCard from '../../components/staff/TestCard';
 import mcq from '../../assets/mcq.png';
 import code from '../../assets/code.png';
-import api from '../../axiosConfig';
+import api from '../../axiosConfig'; // Axios instance
 import { useNavigate } from 'react-router-dom';
 import Loader from '../../layout/Loader';
 
@@ -23,45 +20,50 @@ const Dashboard = () => {
     completedTests: 0,
   });
   const [tests, setTests] = useState([]);
+  const [filteredTests, setFilteredTests] = useState([]);
+  const [activeFilter, setActiveFilter] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch stats and tests dynamically
   useEffect(() => {
 
-    // Parallel API calls for contests and student stats
-    Promise.all([
-      api.get('/api/contests/live?type=all'),
-      api.get('/api/student-stats')
-    ])
-    .then(([contestResponse, studentStatsResponse]) => {
-      const contests = contestResponse.data.contests || [];
-      setTests(contests);
+    const fetchContests = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await api.get('/contests', { withCredentials: true });
 
-      const created = contests.length;
-      const liveTests = contests.filter((contest) => contest.status === 'Live').length;
-      const completedTests = contests.filter((contest) => 
-        contest.status === 'Completed' || 
-        (contest.testEndDate && new Date(contest.testEndDate) < new Date())
-      ).length;
+        const contests = response.data.contests || [];
+        setTests(contests);
+        setFilteredTests(contests);
 
-      // Get total students from the new API endpoint
-      const totalStudents = studentStatsResponse.data.total_students || 0;
+        const liveTests = contests.filter((test) => test.status === 'Live').length;
+        const completedTests = contests.filter((test) => test.status === 'Completed').length;
+        const created = contests.length;
 
-      setStats({ 
-        created, 
-        students: totalStudents, 
-        liveTests, 
-        completedTests 
-      });
-      setIsLoading(false)
+        setStats({
+          created,
+          students: 0,
+          liveTests,
+          completedTests,
+        });
+      } catch (error) {
+        console.error('Error fetching contests:', error);
+      }
+    };
 
-    })
-    .catch((error) => {
-      console.error('Error fetching data:', error);
-      // Optional: Add error handling for the user
-    });
-  }, []);
+    fetchContests();
+  }, []);
+
+  const filterTests = (status) => {
+    setActiveFilter(status);
+    if (status === 'All') {
+      setFilteredTests(tests);
+    } else {
+      setFilteredTests(tests.filter((test) => test.status === status));
+    }
+  };
+
+    
 
 
   const handleModalOpen = () => setIsModalOpen(true);
@@ -85,9 +87,17 @@ const Dashboard = () => {
         {/* Tabs and Create Test Button */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex gap-4">
-            <button className="px-4 py-2 text-gray-600 hover:text-gray-900">All</button>
-            <button className="px-4 py-2 text-gray-600 hover:text-gray-900">Complete</button>
-            <button className="px-4 py-2 text-gray-600 hover:text-gray-900">Live</button>
+            {['All', 'Live', 'Completed', 'Upcoming'].map((status) => (
+              <button
+                key={status}
+                className={`px-4 py-2 ${
+                  activeFilter === status ? 'text-blue-600 font-bold' : 'text-gray-600 hover:text-gray-900'
+                }`}
+                onClick={() => filterTests(status)}
+              >
+                {status}
+              </button>
+            ))}
           </div>
           <button
             className="px-6 py-2 bg-[#00296B] text-white rounded-lg hover:bg-[#0077B6] transition-colors"
