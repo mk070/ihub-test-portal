@@ -35,6 +35,8 @@ urlpatterns = [
     path("api/update_question/<str:question_id>/", update_question, name="update_question"),
     path("api/delete_question/<str:question_id>/", delete_question, name="delete_question"),
 
-    path('api/student-stats', fetch_student_stats, name='student_stats'),
-]
+#ViewTest on admin
+    path('students/stats', fetch_student_stats, name='student_stats'),
+    path('api/contests/<str:contestId>/', view_test_details, name='view_test_details'),  
+    ]
 

@@ -10,7 +10,6 @@ import api from '../../axiosConfig'; // Axios instance
 import { useNavigate } from 'react-router-dom';
 import Loader from '../../layout/Loader';
 
-
 const Dashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState({
@@ -26,32 +25,35 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-
-    const fetchContests = async () => {
+    const fetchData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await api.get('/contests', { withCredentials: true });
+        // Fetch contests and student stats
+        const [contestResponse, studentStatsResponse] = await Promise.all([
+          api.get('/contests', { withCredentials: true }),
+          api.get('/students/stats', { withCredentials: true }),
+        ]);
 
-        const contests = response.data.contests || [];
+        const contests = contestResponse.data.contests || [];
+        const created = contests.length;
+        const liveTests = contests.filter((contest) => contest.status === 'Live').length;
+        const completedTests = contests.filter(
+          (contest) =>
+            contest.status === 'Completed' || (contest.testEndDate && new Date(contest.testEndDate) < new Date())
+        ).length;
+
+        const totalStudents = studentStatsResponse.data.total_students || 0;
+
         setTests(contests);
         setFilteredTests(contests);
-
-        const liveTests = contests.filter((test) => test.status === 'Live').length;
-        const completedTests = contests.filter((test) => test.status === 'Completed').length;
-        const created = contests.length;
-
-        setStats({
-          created,
-          students: 0,
-          liveTests,
-          completedTests,
-        });
+        setStats({ created, students: totalStudents, liveTests, completedTests });
+        setIsLoading(false);
       } catch (error) {
-        console.error('Error fetching contests:', error);
+        console.error('Error fetching data:', error);
+        setIsLoading(false);
       }
     };
 
-    fetchContests();
+    fetchData();
   }, []);
 
   const filterTests = (status) => {
@@ -62,9 +64,6 @@ const Dashboard = () => {
       setFilteredTests(tests.filter((test) => test.status === status));
     }
   };
-
-    
-
 
   const handleModalOpen = () => setIsModalOpen(true);
   const handleModalClose = () => setIsModalOpen(false);
@@ -109,56 +108,42 @@ const Dashboard = () => {
 
         {/* Test Cards Grid */}
         {isLoading ? (
-            <Loader />
-          ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Loader />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredTests.map((test) => {
+              const title = test.assessmentName || 'Unnamed Contest';
+              const type = test.type || 'General';
+              const date = test.startDate
+                ? new Date(test.startDate).toLocaleDateString()
+                : 'Date Unavailable';
+              const category = test.category || 'Uncategorized';
+              const status = test.status || 'Upcoming';
 
-          {tests.map((test) => {
-            const title = test.assessmentName || 'Unnamed Contest';
-            const type = test.type || 'General';
-            const date = test.startDate
-              ? new Date(test.startDate).toLocaleDateString()
-              : 'Date Unavailable';
-            const category = test.category || 'Uncategorized';
-            const status = test.status || 'Upcoming';
-
-            return (
-              <TestCard
-                key={test._id || test.contestId}
-                contestId={test.contestId || test._id}
-                title={title}
-                type={type}
-                date={date}
-                category={category}
-                stats={{
-                  Assigned: test.assigned || 0,
-                  Register: test.register || 0,
-                  Completed: test.complete || 0,
-                }}
-                status={status}
-                onView={() => console.log('Viewing test:', test._id || test.contestId)}
-              />
-            );
-          })}
-
-        </div>
+              return (
+                <TestCard
+                  key={test._id || test.contestId}
+                  contestId={test.contestId || test._id}
+                  title={title}
+                  type={type}
+                  date={date}
+                  category={category}
+                  stats={{
+                    Assigned: test.assigned || 0,
+                    Register: test.register || 0,
+                    Completed: test.complete || 0,
+                  }}
+                  status={status}
+                  onView={() => console.log('Viewing test:', test._id || test.contestId)}
+                />
+              );
+            })}
+          </div>
         )}
       </div>
 
       {/* Modal for Create Test */}
-      <Dialog
-        open={isModalOpen}
-        onClose={handleModalClose}
-        maxWidth="sm"
-        fullWidth
-        sx={{
-          '& .MuiDialog-paper': {
-            borderRadius: '16px',
-            padding: '16px',
-            position: 'relative',
-          },
-        }}
-      >
+      <Dialog open={isModalOpen} onClose={handleModalClose} maxWidth="sm" fullWidth>
         <DialogTitle>
           <Typography variant="h6" align="center" fontWeight="bold">
             Select Test Type
@@ -196,7 +181,9 @@ const Dashboard = () => {
                 }}
               >
                 <img src={mcq} alt="Skill Assessment" style={{ maxWidth: '80px', margin: '0 auto' }} />
-                <Typography variant="h6" mt={2}>Skill Assessment</Typography>
+                <Typography variant="h6" mt={2}>
+                  Skill Assessment
+                </Typography>
                 <Typography variant="body2" color="textSecondary">
                   Evaluations to test knowledge and skills across different topics
                 </Typography>
@@ -220,7 +207,9 @@ const Dashboard = () => {
                 }}
               >
                 <img src={code} alt="Code Contest" style={{ maxWidth: '80px', margin: '0 auto' }} />
-                <Typography variant="h6" mt={2}>Code Contest</Typography>
+                <Typography variant="h6" mt={2}>
+                  Code Contest
+                </Typography>
                 <Typography variant="body2" color="textSecondary">
                   Challenges to assess programming and problem-solving skills
                 </Typography>
