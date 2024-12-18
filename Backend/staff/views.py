@@ -264,7 +264,8 @@ def fetch_contests(request):
 
         # Process and filter the results manually
         for contest in contests_cursor:
-            if contest.get("staffId") == staff_id:  # Match staffId with staff_id
+            if contest.get("staffId") == staff_id:  # Match staffId
+                visible_to_users = contest.get("visible_to", [])  # Fetch the visible_to array
                 start_date = contest.get("startDate")
                 end_date = contest.get("endDate")
 
@@ -279,9 +280,9 @@ def fetch_contests(request):
                     else:
                         status = "Completed"
                 else:
-                    status = "Upcoming"  # Fallback status
+                    status = "Upcoming"
 
-                # Append only the matched document
+                # Append the contest details
                 contests.append({
                     "_id": str(contest.get("_id", "")),
                     "contestId": contest.get("contestId", ""),
@@ -291,6 +292,7 @@ def fetch_contests(request):
                     "startDate": start_date,
                     "endDate": end_date,
                     "status": status,
+                    "assignedCount": len(visible_to_users),  # Count of users in 'visible_to'
                 })
 
         return Response({

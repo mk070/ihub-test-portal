@@ -123,13 +123,13 @@ const Dashboard = () => {
               return (
                 <TestCard
                   key={test._id || test.contestId}
-                  contestId={test.contestId || test._id}
+                  contestId={test.contestId || test._id} 
                   title={title}
                   type={type}
                   date={date}
                   category={category}
                   stats={{
-                    Assigned: test.assigned || 0,
+                    Assigned: test.assignedCount || 0,
                     Register: test.register || 0,
                     Completed: test.complete || 0,
                   }}
