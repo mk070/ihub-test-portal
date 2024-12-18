@@ -103,7 +103,6 @@ const SinglePageStepper = () => {
                     },
                     body: JSON.stringify(payload),
                     credentials: "include", // Required to send cookies
-
             });
 
                 const data = await response.json();

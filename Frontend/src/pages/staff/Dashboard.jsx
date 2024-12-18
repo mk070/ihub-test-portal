@@ -176,7 +176,7 @@ const Dashboard = () => {
                   '&:hover': { backgroundColor: '#F5F5F5' },
                 }}
                 onClick={() => {
-                  navigate('/coding/details');
+                  navigate('/mcq/details');
                   handleModalClose();
                 }}
               >

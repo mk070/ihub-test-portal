@@ -633,13 +633,13 @@ const [formData, setFormData] = useState({
                   Edit
                 </button>
                 <button
-  onClick={() => {
-    setShowConfirm(true); // Show the confirmation modal
-  }}
-  className="flex-1 text-red-600 bg-red-100 hover:bg-red-200 px-6 py-3 rounded-lg transition"
->
-  Delete
-</button>
+                  onClick={() => {
+                    setShowConfirm(true); // Show the confirmation modal
+                  }}
+                  className="flex-1 text-red-600 bg-red-100 hover:bg-red-200 px-6 py-3 rounded-lg transition"
+                >
+                  Delete
+                </button>
               </>
             )}
           </div>
@@ -682,10 +682,6 @@ const [formData, setFormData] = useState({
 )}
   </div>
 )}
-
-
-
-
 
 
             </div>

@@ -33,6 +33,12 @@ import StudentStats from './pages/staff/coding/studentstats';
 import Mcq from './pages/staff/mcq/Mcq';
 import ViewTest from './pages/staff/coding/ViewTest';
 import StaffProfile from './pages/staff/StaffProfile';
+import Mcq_Assesment from './pages/staff/mcq/Mcq_Assesment';
+import Mcq_section from './pages/staff/mcq/Mcq_section';
+import Mcq_questions from './components/staff/mcq/Mcq_questions';
+import Mcq_createQuestion from './components/staff/mcq/Mcq_createQuestion';
+import Mcq_bulkUpload from './components/staff/mcq/Mcq_bulkUpload';
+import Mcq_Dashboard from './pages/staff/mcq/Mcq_Dashboard';
 
 
 
@@ -71,6 +77,9 @@ function App() {
           <Route path="/studentdashboard" element={<StudentDashboard />} />
           <Route path="/studentprofile" element={<StudentProfile studentId={studentId} />} />
         </Route>
+        <Route path="/testinstructions/:contestId" element={<TestInstructions />} />
+        <Route path="/Contest/:contestId" element={<ContestPage />} />
+
 
         {/* Staff Routes */}
         <Route path="/stafflogin" element={<Login />} />
@@ -79,40 +88,49 @@ function App() {
           <Route path="/staffdashboard" element={<Dashboard />} />
           <Route path="/staffprofile" element={<StaffProfile />} />
           <Route path="/library" element={<Library />} />
-           <Route path="/coding/details" element={<Assesment />} /> {/* coding creation */}
-          <Route path="/coding" element={<ContestDashboard />} />
+          <Route path="/coding/details" element={<Assesment />} /> {/* coding creation */}
           <Route path="/SelectTestOption" element={<SelectTestOption />} />
-          <Route path="/FileUpload" element={<FileUpload />} />
-          <Route path="/ManualSelectUI" element={<ManualSelectUI />} />
-          <Route path="/HrUpload/:contestId" element={<HrUpload />} />
-          <Route path="/OnebyOne" element={<OnebyOne />} />
-          <Route path="/ManualPage/:contestId" element={<ManualPage />} />
-          {/* <Route path="/CreateContest" element={<CreateContest />} /> */}
           <Route path="/staffstudentprofile" element={<StaffStudentProfile/>} />         
-
-
           <Route path="/:contestId/Questions" element={<Questions />} />
           <Route path="/:contestId/QuestionsLibrary" element={<QuestionsLibrary />} />          
-
           <Route path="/library/Mcq" element={<Mcq/>} />
           <Route path="/Questions/:contestId" element={<Questions />} />
           <Route path="/QuestionsLibrary/:contestId" element={<QuestionsLibrary />} />          
-
-          <Route path="/StartContest" element={<StartContest />} />
-           <Route path="/studentstats/:regno" element={<StudentStats />} /> 
-           <Route path="/viewcontest/:contestId" element={<ViewContest />} />
+          <Route path="/studentstats/:regno" element={<StudentStats />} /> 
+          <Route path="/viewcontest/:contestId" element={<ViewContest />} />
           <Route path="/:contestId/question-preview" element={<QuestionPreview />} />
           <Route path="/viewtest/:contestId" element={<ViewTest />} />
+
+          {/* <Route path="/coding" element={<ContestDashboard />} /> */}
+          {/* <Route path="/FileUpload" element={<FileUpload />} /> */}
+          {/* <Route path="/ManualSelectUI" element={<ManualSelectUI />} /> */}
+          {/* <Route path="/HrUpload/:contestId" element={<HrUpload />} /> */}
+          {/* <Route path="/OnebyOne" element={<OnebyOne />} /> */}
+          {/* <Route path="/ManualPage/:contestId" element={<ManualPage />} /> */}
+          {/* <Route path="/CreateContest" element={<CreateContest />} /> */}
+          {/* <Route path="/StartContest" element={<StartContest />} /> */}
+          
 
           <Route path="/library/coding" element={<QuestionDashboard />} />
           <Route path="/BulkUpload" element={<BulkUpload />} />
           <Route path="/viewtest/:contestId" element={<ViewTest />} />
 
-        </Route>
-        <Route path="/testinstructions/:contestId" element={<TestInstructions />} />
-        <Route path="/Contest/:contestId" element={<ContestPage />} />
+          {/* MCQ - routes */}
+          <Route path='mcq/details' element={<Mcq_Assesment />}/>
+          <Route path='mcq/sectionDetails' element={<Mcq_section/>}/>
+          <Route path='mcq/questions' element={<Mcq_questions/>}/>
+          <Route path='mcq/CreateQuestion' element = {<Mcq_createQuestion/>}/>
+          <Route path='mcq/bulkUpload' element={<Mcq_bulkUpload />}/>
+          <Route path='mcq/QuestionsDashboard' element = {<Mcq_Dashboard/>}/>
 
-        {/* New View Contest Route */}
+        </Route>
+       
+        {/* <Route path="/assessment-overview" element={<AssessmentOverview />} />
+        <Route path="/test-configuration" element={<TestConfiguration />} /> */}
+        {/* <Route path='/UploadType' element = {<HomeTwo/>} />
+        <Route path='/QuestionsDashboard' element = {<Dashboard/>}/>
+        <Route path='/BulkUpload' element = {<Upload/>}/> */}
+
       </Routes>
     </Router>
   );
