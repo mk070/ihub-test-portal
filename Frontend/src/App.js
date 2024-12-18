@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
-import CreateContest from './pages/staff/coding/CreateContest';
 import ContestPage from './pages/staff/coding/ContestPage';
 import StartContest from './pages/staff/coding/StartContest';
 import SelectTestOption from './pages/staff/coding/SelectTestOption';
@@ -32,8 +31,10 @@ import BulkUpload from "./pages/staff/coding/BulkUpload";
 import StaffStudentProfile from './pages/staff/coding/StaffStudentProfile';
 import StudentStats from './pages/staff/coding/studentstats';
 import Mcq from './pages/staff/mcq/Mcq';
+
 import ViewTest from './pages/staff/coding/ViewTest';
 import StaffProfile from './pages/staff/StaffProfile';
+
 
 
 // Layout component for wrapping student routes
@@ -85,7 +86,7 @@ function App() {
           <Route path="/HrUpload/:contestId" element={<HrUpload />} />
           <Route path="/OnebyOne" element={<OnebyOne />} />
           <Route path="/ManualPage/:contestId" element={<ManualPage />} />
-          <Route path="/CreateContest" element={<CreateContest />} />
+          {/* <Route path="/CreateContest" element={<CreateContest />} /> */}
           <Route path="/staffstudentprofile" element={<StaffStudentProfile/>} />         
 
 

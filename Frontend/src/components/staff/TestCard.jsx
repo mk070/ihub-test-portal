@@ -1,7 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const TestCard = ({ title, type, date, category, stats, status, contestId }) => {
+
+
+const TestCard = ({ title, type, date, category, stats, status, onView, contestId }) => {
+
   const navigate = useNavigate();
   // Dynamic styles for the status
     const handleViewTest = () => { 
@@ -16,15 +19,18 @@ const TestCard = ({ title, type, date, category, stats, status, contestId }) => 
       ? 'bg-yellow-200 text-yellow-800' 
       : 'bg-red-300 text-red-800';
 
+
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm">
       <div className="flex justify-between items-start mb-6">
         <div className="flex items-center gap-2">
-          <span className={`px-2 py-1 rounded-full text-sm font-semibold ${statusStyles}`}>{status}</span>
+          
           <h3 className="text-lg font-semibold">{title}</h3>
         </div>
         <button
+
           onClick={handleViewTest}
+
           className="px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-colors"
         >
           View Test
@@ -49,4 +55,6 @@ const TestCard = ({ title, type, date, category, stats, status, contestId }) => 
   );
 };
 
+
 export default TestCard;
+

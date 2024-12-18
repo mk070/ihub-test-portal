@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 import logging
 from .utils import *
 import jwt
+
+from pymongo import MongoClient
 from .utils import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -18,6 +20,9 @@ from datetime import datetime, timezone
 client = MongoClient('mongodb+srv://ihub:ihub@test-portal.lcgyx.mongodb.net/test_portal_db?retryWrites=true&w=majority')
 db = client['test_portal_db']
 assessments_collection = db['coding_assessments']
+staff_collection = db['staff']
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +94,7 @@ def staff_login(request):
             value=tokens['jwt'],
             httponly=True,
             samesite='Lax',
+            path="/",      # Ensure the cookie is sent for all routes
             secure=os.getenv("ENV") == "production",
             max_age=1 * 24 * 60 * 60  # 1 day expiration
         )
@@ -145,6 +151,47 @@ def staff_signup(request):
         return Response(
             {"error": "Something went wrong. Please try again later."}, status=500
         )
+
+@csrf_exempt
+def view_test_details(request, contestId):
+    """
+    Fetch details of a specific test from MongoDB using the contestId.
+    """
+    try:
+        # Fetch the test details using the contestId field
+        test_details = assessments_collection.find_one({"contestId": contestId}, {"_id": 0})
+
+        if test_details:
+            # Prepare the response data
+            # context = {
+            #     "assessment_name": test_details.get("assessmentName", "N/A"),
+            #     "start_date": test_details.get("startDate", "N/A"),
+            #     "end_date": test_details.get("endDate", "N/A"),
+            #     "guidelines": test_details.get("guidelines", []),
+            #     "contest_id": test_details.get("contestId", "N/A"),
+            # }
+            return JsonResponse(test_details, safe=False)  
+        else:
+            return JsonResponse({"error": "Test not found"}, status=404)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    
+def contest_details(request, contestID):
+    """
+    Fetch the contest details from MongoDB using the contest_id.
+    """
+    try:
+        # Fetch the contest details from the MongoDB collection using contest_id
+        contest_details = assessments_collection.find_one({"contestId": contestID})
+        if contest_details:
+            return JsonResponse(contest_details, safe=False)
+        else:
+            return JsonResponse({"error": "Contest not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
 #Student Counts Fetching 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -251,57 +298,19 @@ def fetch_contests(request):
             "total": len(contests)
         })
 
+
     except jwt.ExpiredSignatureError:
         return Response({"error": "Token has expired"}, status=401)
     except jwt.InvalidTokenError:
         return Response({"error": "Invalid token"}, status=401)
     except Exception as e:
+
         logger.error(f"Error fetching contests: {e}")
         return Response({"error": "Something went wrong. Please try again later."}, status=500)
 
 
 
-    
-#View_Test 
-@csrf_exempt
-def view_test_details(request, contestId):
-    """
-    Fetch details of a specific test from MongoDB using the contestId.
-    """
-    try:
-        # Fetch the test details using the contestId field
-        test_details = assessments_collection.find_one({"contestId": contestId}, {"_id": 0})
 
-        if test_details:
-            # Prepare the response data
-            # context = {
-            #     "assessment_name": test_details.get("assessmentName", "N/A"),
-            #     "start_date": test_details.get("startDate", "N/A"),
-            #     "end_date": test_details.get("endDate", "N/A"),
-            #     "guidelines": test_details.get("guidelines", []),
-            #     "contest_id": test_details.get("contestId", "N/A"),
-            # }
-            return JsonResponse(test_details, safe=False)  
-        else:
-            return JsonResponse({"error": "Test not found"}, status=404)
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
-    
-def contest_details(request, contestID):
-    """
-    Fetch the contest details from MongoDB using the contest_id.
-    """
-    try:
-        # Fetch the contest details from the MongoDB collection using contest_id
-        contest_details = assessments_collection.find_one({"contestId": contestID})
-        if contest_details:
-            return JsonResponse(contest_details, safe=False)
-        else:
-            return JsonResponse({"error": "Contest not found"}, status=404)
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
-    
 @api_view(["GET", "PUT"])  # Allow both GET and PUT requests
 @permission_classes([AllowAny])
 @authentication_classes([])
@@ -324,7 +333,6 @@ def get_staff_profile(request):
             raise AuthenticationFailed("Invalid token. Please log in again.")
         
         staff_id = decoded_token.get("staff_user")
-
 
         if not staff_id:
             raise AuthenticationFailed("Invalid token payload.")
@@ -375,3 +383,47 @@ def get_staff_profile(request):
     except Exception as e:
         print(f"Unexpected error: {e}")
         return Response({"error": "An unexpected error occurred"}, status=500)
+
+
+
+    
+#View_Test 
+@csrf_exempt
+def view_test_details(request, contestId):
+    """
+    Fetch details of a specific test from MongoDB using the contestId.
+    """
+    try:
+        # Fetch the test details using the contestId field
+        test_details = assessments_collection.find_one({"contestId": contestId}, {"_id": 0})
+
+        if test_details:
+            # Prepare the response data
+            # context = {
+            #     "assessment_name": test_details.get("assessmentName", "N/A"),
+            #     "start_date": test_details.get("startDate", "N/A"),
+            #     "end_date": test_details.get("endDate", "N/A"),
+            #     "guidelines": test_details.get("guidelines", []),
+            #     "contest_id": test_details.get("contestId", "N/A"),
+            # }
+            return JsonResponse(test_details, safe=False)  
+        else:
+            return JsonResponse({"error": "Test not found"}, status=404)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    
+def contest_details(request, contestID):
+    """
+    Fetch the contest details from MongoDB using the contest_id.
+    """
+    try:
+        # Fetch the contest details from the MongoDB collection using contest_id
+        contest_details = assessments_collection.find_one({"contestId": contestID})
+        if contest_details:
+            return JsonResponse(contest_details, safe=False)
+        else:
+            return JsonResponse({"error": "Contest not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+

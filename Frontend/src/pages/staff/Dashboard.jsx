@@ -8,6 +8,8 @@ import mcq from '../../assets/mcq.png';
 import code from '../../assets/code.png';
 import api from '../../axiosConfig'; // Axios instance
 import { useNavigate } from 'react-router-dom';
+import Loader from '../../layout/Loader';
+
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -21,8 +23,10 @@ const Dashboard = () => {
   const [filteredTests, setFilteredTests] = useState([]);
   const [activeFilter, setActiveFilter] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+
     const fetchContests = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -58,6 +62,9 @@ const Dashboard = () => {
       setFilteredTests(tests.filter((test) => test.status === status));
     }
   };
+
+    
+
 
   const handleModalOpen = () => setIsModalOpen(true);
   const handleModalClose = () => setIsModalOpen(false);
@@ -101,6 +108,9 @@ const Dashboard = () => {
         </div>
 
         {/* Test Cards Grid */}
+        {isLoading ? (
+            <Loader />
+          ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           {tests.map((test) => {
@@ -132,6 +142,7 @@ const Dashboard = () => {
           })}
 
         </div>
+        )}
       </div>
 
       {/* Modal for Create Test */}
