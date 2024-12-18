@@ -266,8 +266,10 @@ def fetch_contests(request):
         for contest in contests_cursor:
             if contest.get("staffId") == staff_id:  # Match staffId
                 visible_to_users = contest.get("visible_to", [])  # Fetch the visible_to array
-                start_date = contest.get("startDate")
-                end_date = contest.get("endDate")
+                start_date = contest.get("assessmentOverview", {}).get("registrationStart")
+                end_date = contest.get("assessmentOverview", {}).get("registrationEnd")
+                print("Start date:", start_date)
+                print("End date:", end_date)
 
                 # Determine the status of the contest
                 if start_date and end_date:
@@ -289,11 +291,12 @@ def fetch_contests(request):
                     "assessmentName": contest.get("assessmentOverview", {}).get("name", "Unnamed Contest"),
                     "type": "Coding",
                     "category": "Technical",
-                    "startDate": start_date,
-                    "endDate": end_date,
+                    "startDate": contest.get("assessmentOverview", {}).get("registrationStart", "Null"),
+                    "endDate": contest.get("assessmentOverview", {}).get("registrationEnd", "Null"),
                     "status": status,
                     "assignedCount": len(visible_to_users),  # Count of users in 'visible_to'
                 })
+
 
         return Response({
             "contests": contests,
