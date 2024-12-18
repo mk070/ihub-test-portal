@@ -29,7 +29,7 @@ const ViewTest = () => {
   if (!testDetails) return <div>Loading...</div>;
 
   // Destructure testDetails for easier rendering
-  const { assessmentOverview, testConfiguration, question_ids, problems, visible_to } = testDetails;
+  const { assessmentOverview, testConfiguration, problems, visible_to } = testDetails;
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -46,7 +46,6 @@ const ViewTest = () => {
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Assessment Overview</h2>
         <p><strong>Description:</strong> {assessmentOverview?.description || "N/A"}</p>
-        <p><strong>Max Registrations:</strong> {assessmentOverview?.maxRegistrations || "N/A"}</p>
         <p><strong>Guidelines:</strong> {assessmentOverview?.guidelines || "N/A"}</p>
       </div>
 

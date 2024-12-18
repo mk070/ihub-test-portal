@@ -1,18 +1,14 @@
-
-// Dashboard.jsx
-
 import React, { useState, useEffect } from 'react';
 import { FaChartBar, FaUsers, FaClipboardList, FaCheckCircle } from 'react-icons/fa';
-import StatsCard from '../../components/staff/StatsCard';
-import TestCard from '../../components/staff/TestCard';
 import { Dialog, DialogTitle, DialogContent, IconButton, DialogActions, Typography, Grid, Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import StatsCard from '../../components/staff/StatsCard';
+import TestCard from '../../components/staff/TestCard';
 import mcq from '../../assets/mcq.png';
 import code from '../../assets/code.png';
-import api from '../../axiosConfig';
+import api from '../../axiosConfig'; // Axios instance
 import { useNavigate } from 'react-router-dom';
 import Loader from '../../layout/Loader';
-
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -23,46 +19,51 @@ const Dashboard = () => {
     completedTests: 0,
   });
   const [tests, setTests] = useState([]);
+  const [filteredTests, setFilteredTests] = useState([]);
+  const [activeFilter, setActiveFilter] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch stats and tests dynamically
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch contests and student stats
+        const [contestResponse, studentStatsResponse] = await Promise.all([
+          api.get('/contests', { withCredentials: true }),
+          api.get('/students/stats', { withCredentials: true }),
+        ]);
 
-    // Parallel API calls for contests and student stats
-    Promise.all([
-      api.get('/api/contests/live?type=all'),
-      api.get('/api/student-stats')
-    ])
-    .then(([contestResponse, studentStatsResponse]) => {
-      const contests = contestResponse.data.contests || [];
-      setTests(contests);
+        const contests = contestResponse.data.contests || [];
+        const created = contests.length;
+        const liveTests = contests.filter((contest) => contest.status === 'Live').length;
+        const completedTests = contests.filter(
+          (contest) =>
+            contest.status === 'Completed' || (contest.testEndDate && new Date(contest.testEndDate) < new Date())
+        ).length;
 
-      const created = contests.length;
-      const liveTests = contests.filter((contest) => contest.status === 'Live').length;
-      const completedTests = contests.filter((contest) => 
-        contest.status === 'Completed' || 
-        (contest.testEndDate && new Date(contest.testEndDate) < new Date())
-      ).length;
+        const totalStudents = studentStatsResponse.data.total_students || 0;
 
-      // Get total students from the new API endpoint
-      const totalStudents = studentStatsResponse.data.total_students || 0;
+        setTests(contests);
+        setFilteredTests(contests);
+        setStats({ created, students: totalStudents, liveTests, completedTests });
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setIsLoading(false);
+      }
+    };
 
-      setStats({ 
-        created, 
-        students: totalStudents, 
-        liveTests, 
-        completedTests 
-      });
-      setIsLoading(false)
+    fetchData();
+  }, []);
 
-    })
-    .catch((error) => {
-      console.error('Error fetching data:', error);
-      // Optional: Add error handling for the user
-    });
-  }, []);
-
+  const filterTests = (status) => {
+    setActiveFilter(status);
+    if (status === 'All') {
+      setFilteredTests(tests);
+    } else {
+      setFilteredTests(tests.filter((test) => test.status === status));
+    }
+  };
 
   const handleModalOpen = () => setIsModalOpen(true);
   const handleModalClose = () => setIsModalOpen(false);
@@ -85,9 +86,17 @@ const Dashboard = () => {
         {/* Tabs and Create Test Button */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex gap-4">
-            <button className="px-4 py-2 text-gray-600 hover:text-gray-900">All</button>
-            <button className="px-4 py-2 text-gray-600 hover:text-gray-900">Complete</button>
-            <button className="px-4 py-2 text-gray-600 hover:text-gray-900">Live</button>
+            {['All', 'Live', 'Completed', 'Upcoming'].map((status) => (
+              <button
+                key={status}
+                className={`px-4 py-2 ${
+                  activeFilter === status ? 'text-blue-600 font-bold' : 'text-gray-600 hover:text-gray-900'
+                }`}
+                onClick={() => filterTests(status)}
+              >
+                {status}
+              </button>
+            ))}
           </div>
           <button
             className="px-6 py-2 bg-[#00296B] text-white rounded-lg hover:bg-[#0077B6] transition-colors"
@@ -99,56 +108,42 @@ const Dashboard = () => {
 
         {/* Test Cards Grid */}
         {isLoading ? (
-            <Loader />
-          ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Loader />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredTests.map((test) => {
+              const title = test.assessmentName || 'Unnamed Contest';
+              const type = test.type || 'General';
+              const date = test.endDate
+                ? new Date(test.endDate).toLocaleDateString()
+                : 'Date Unavailable';
+              const category = test.category || 'Uncategorized';
+              const status = test.status || 'Upcoming';
 
-          {tests.map((test) => {
-            const title = test.assessmentName || 'Unnamed Contest';
-            const type = test.type || 'General';
-            const date = test.startDate
-              ? new Date(test.startDate).toLocaleDateString()
-              : 'Date Unavailable';
-            const category = test.category || 'Uncategorized';
-            const status = test.status || 'Upcoming';
-
-            return (
-              <TestCard
-                key={test._id || test.contestId}
-                contestId={test.contestId || test._id}
-                title={title}
-                type={type}
-                date={date}
-                category={category}
-                stats={{
-                  Assigned: test.assigned || 0,
-                  Register: test.register || 0,
-                  Completed: test.complete || 0,
-                }}
-                status={status}
-                onView={() => console.log('Viewing test:', test._id || test.contestId)}
-              />
-            );
-          })}
-
-        </div>
+              return (
+                <TestCard
+                  key={test._id || test.contestId}
+                  contestId={test.contestId || test._id} 
+                  title={title}
+                  type={type} 
+                  date={date}
+                  category={category}
+                  stats={{
+                    Assigned: test.assignedCount || 0,
+                    Register: test.register || 0,
+                    Completed: test.complete || 0,
+                  }}
+                  status={status}
+                  onView={() => console.log('Viewing test:', test._id || test.contestId)}
+                />
+              );
+            })}
+          </div>
         )}
       </div>
 
       {/* Modal for Create Test */}
-      <Dialog
-        open={isModalOpen}
-        onClose={handleModalClose}
-        maxWidth="sm"
-        fullWidth
-        sx={{
-          '& .MuiDialog-paper': {
-            borderRadius: '16px',
-            padding: '16px',
-            position: 'relative',
-          },
-        }}
-      >
+      <Dialog open={isModalOpen} onClose={handleModalClose} maxWidth="sm" fullWidth>
         <DialogTitle>
           <Typography variant="h6" align="center" fontWeight="bold">
             Select Test Type
@@ -181,12 +176,14 @@ const Dashboard = () => {
                   '&:hover': { backgroundColor: '#F5F5F5' },
                 }}
                 onClick={() => {
-                  navigate('/coding/details');
+                  navigate('/mcq/details');
                   handleModalClose();
                 }}
               >
                 <img src={mcq} alt="Skill Assessment" style={{ maxWidth: '80px', margin: '0 auto' }} />
-                <Typography variant="h6" mt={2}>Skill Assessment</Typography>
+                <Typography variant="h6" mt={2}>
+                  Skill Assessment
+                </Typography>
                 <Typography variant="body2" color="textSecondary">
                   Evaluations to test knowledge and skills across different topics
                 </Typography>
@@ -210,7 +207,9 @@ const Dashboard = () => {
                 }}
               >
                 <img src={code} alt="Code Contest" style={{ maxWidth: '80px', margin: '0 auto' }} />
-                <Typography variant="h6" mt={2}>Code Contest</Typography>
+                <Typography variant="h6" mt={2}>
+                  Code Contest
+                </Typography>
                 <Typography variant="body2" color="textSecondary">
                   Challenges to assess programming and problem-solving skills
                 </Typography>

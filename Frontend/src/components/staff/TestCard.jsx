@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const TestCard = ({ title, type, date, category, stats, status, onView, contestId }) => {
   const navigate = useNavigate();
   // Dynamic styles for the status
-    const handleViewTest = () => {
+    const handleViewTest = () => { 
     navigate(`/viewtest/${contestId}`); // Navigate to the ViewTest page with the testId
   };
 
@@ -22,7 +22,7 @@ const TestCard = ({ title, type, date, category, stats, status, onView, contestI
     <div className="bg-white rounded-xl p-6 shadow-sm">
       <div className="flex justify-between items-start mb-6">
         <div className="flex items-center gap-2">
-          
+          <span className={`px-2 py-1 rounded-full text-sm font-semibold ${statusStyles}`}>{status}</span>
           <h3 className="text-lg font-semibold">{title}</h3>
         </div>
         <button
@@ -54,4 +54,3 @@ const TestCard = ({ title, type, date, category, stats, status, onView, contestI
 };
 
 export default TestCard;
-  

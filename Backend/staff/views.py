@@ -225,133 +225,91 @@ def fetch_student_stats(request):
     except Exception as e:
         logger.error(f"Error fetching student stats: {e}")
         return Response({"error": "Something went wrong. Please try again later."}, status=500)
-    
+
+#Admin test
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def fetch_contests(request):
-    """ 
-    Fetch live or all contests from MongoDB based on query parameters.
-    Handles two different collection structures.
+    """
+    Fetch contests created by the logged-in admin from MongoDB.
+    Filters contests using staff_user from the JWT token.
     """
     try:
-        contest_type = request.query_params.get('type', 'live')
+        jwt_token = request.COOKIES.get("jwt")
+        if not jwt_token:
+            raise AuthenticationFailed("Authentication credentials were not provided.")
+
+        # Decode JWT token
+        try:
+            decoded_token = jwt.decode(jwt_token, 'test', algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Access token has expired. Please log in again.")
+        except jwt.InvalidTokenError:
+            raise AuthenticationFailed("Invalid token. Please log in again.")
+        
+        staff_id = decoded_token.get("staff_user")
+        print("Decoded staff_id:", staff_id)
+
+        if not staff_id:
+            raise AuthenticationFailed("Invalid token payload.")
+
+        # Connect to the MongoDB collection
         coding_assessments = db['coding_assessments']
-        current_time = datetime.utcnow().replace(tzinfo=timezone.utc)  # Ensure UTC timezone for consistency
-        current_date = current_time.date()  # Extract only the current date
+        current_time = datetime.utcnow().replace(tzinfo=timezone.utc)
+        current_date = current_time.date()
 
-        # Base query to match assessment documents
-        base_query = {}
-
-        # Add time-based filters for live contests
-        if contest_type == 'live':
-            base_query.update({
-                "$or": [
-                    # Structure 1: Direct startDate and endDate
-                    {
-                        "startDate": {"$lte": current_time},
-                        "endDate": {"$gte": current_time}
-                    },
-                    # Structure 2: Registration-based filtering
-                    {
-                        "assessmentOverview.registrationStart": {"$lte": current_time},
-                        "$or": [
-                            {"assessmentOverview.registrationEnd": {"$gte": current_time}},
-                            {"assessmentOverview.registrationEnd": None}
-                        ]
-                    }
-                ]
-            })
-
-        contests_cursor = coding_assessments.find(base_query)
+        # Fetch all documents (unfiltered initially)
+        contests_cursor = coding_assessments.find()
         contests = []
 
+        # Process and filter the results manually
         for contest in contests_cursor:
-            try:
-                # Determine which structure we're dealing with
-                if "assessmentOverview" in contest:
-                    # Structure 2
-                    start_date = contest.get("assessmentOverview", {}).get("registrationStart")
-                    end_date = contest.get("assessmentOverview", {}).get("registrationEnd")
-                    assessment_name = contest.get("assessmentOverview", {}).get("name", "Unnamed Contest")
-                    guidelines = contest.get("assessmentOverview", {}).get("guidelines", [])
-                    
-                    # Get the test configuration
-                    test_config = contest.get("testConfiguration", {})
-                    
-                    # Get the number of problems
-                    problems_count = len(contest.get("problems", []))
+            if contest.get("staffId") == staff_id:  # Match staffId
+                visible_to_users = contest.get("visible_to", [])  # Fetch the visible_to array
+                start_date = contest.get("assessmentOverview", {}).get("registrationStart")
+                end_date = contest.get("assessmentOverview", {}).get("registrationEnd")
+                print("Start date:", start_date)
+                print("End date:", end_date)
 
-                    # Updated logic for status determination
-                    if start_date and end_date:
-                        start_date_only = start_date.date()  # Extract only the date
-                        end_date_only = end_date.date()
-
-                        if current_date < start_date_only:
-                            status = "Upcoming"
-                        elif start_date_only <= current_date <= end_date_only:
-                            status = "Live"
-                        elif current_date > end_date_only:
-                            status = "Completed"
+                # Determine the status of the contest
+                if start_date and end_date:
+                    start_date_only = start_date.date()
+                    end_date_only = end_date.date()
+                    if current_date < start_date_only:
+                        status = "Upcoming"
+                    elif start_date_only <= current_date <= end_date_only:
+                        status = "Live"
                     else:
-                        status = "Upcoming"  # Fallback status if dates are incomplete
-
-                    contests.append({
-                        "_id": str(contest.get("_id", "")),
-                        "contestId": contest.get("contestId", ""),
-                        "assessmentName": assessment_name,
-                        "type": "Coding",
-                        "category": "Technical",
-                        "startDate": start_date,
-                        "endDate": end_date,
-                        "duration": test_config.get("duration", ""),
-                        "guidelines": guidelines,
-                        "assigned": len(contest.get("visible_to", [])),
-                        "register": contest.get("register", 0),
-                        "complete": contest.get("complete", 0),
-                        "totalQuestions": problems_count,
-                        "status": status
-                    })
+                        status = "Completed"
                 else:
-                    # Structure 1
-                    start_date = contest.get("startDate")
-                    end_date = contest.get("endDate")
+                    status = "Upcoming"
 
-                    # Updated logic for status determination
-                    if start_date and end_date:
-                        start_date_only = start_date.date()
-                        end_date_only = end_date.date()
+                # Append the contest details
+                contests.append({
+                    "_id": str(contest.get("_id", "")),
+                    "contestId": contest.get("contestId", ""),
+                    "assessmentName": contest.get("assessmentOverview", {}).get("name", "Unnamed Contest"),
+                    "type": "Coding",
+                    "category": "Technical",
+                    "startDate": contest.get("assessmentOverview", {}).get("registrationStart", "Null"),
+                    "endDate": contest.get("assessmentOverview", {}).get("registrationEnd", "Null"),
+                    "status": status,
+                    "assignedCount": len(visible_to_users),  # Count of users in 'visible_to'
+                })
 
-                        if current_date < start_date_only:
-                            status = "Upcoming"
-                        elif start_date_only <= current_date <= end_date_only:
-                            status = "Live"
-                        elif current_date > end_date_only:
-                            status = "Completed"
-                    else:
-                        status = "Upcoming"  # Fallback status if dates are incomplete
-
-                    contests.append({
-                        "_id": str(contest.get("_id", "")),
-                        "contestId": contest.get("contestId", ""),
-                        "assessmentName": contest.get("assessmentName", "Unnamed Contest"),
-                        "type": "Coding",
-                        "category": "Technical",
-                        "startDate": start_date,
-                        "endDate": end_date,
-                        "guidelines": contest.get("guidelines", []),
-                        "status": status
-                    })
-
-            except Exception as e:
-                logger.error(f"Error processing contest {contest.get('_id', 'unknown')}: {e}")
-                continue
 
         return Response({
             "contests": contests,
             "total": len(contests)
         })
 
-    except Exception as e:  
+
+    except jwt.ExpiredSignatureError:
+        return Response({"error": "Token has expired"}, status=401)
+    except jwt.InvalidTokenError:
+        return Response({"error": "Invalid token"}, status=401)
+    except Exception as e:
+
         logger.error(f"Error fetching contests: {e}")
         return Response({"error": "Something went wrong. Please try again later."}, status=500)
 
@@ -429,46 +387,4 @@ def get_staff_profile(request):
     except Exception as e:
         print(f"Unexpected error: {e}")
         return Response({"error": "An unexpected error occurred"}, status=500)
-
-
-    
-#View_Test 
-@csrf_exempt
-def view_test_details(request, contestId):
-    """
-    Fetch details of a specific test from MongoDB using the contestId.
-    """
-    try:
-        # Fetch the test details using the contestId field
-        test_details = assessments_collection.find_one({"contestId": contestId}, {"_id": 0})
-
-        if test_details:
-            # Prepare the response data
-            # context = {
-            #     "assessment_name": test_details.get("assessmentName", "N/A"),
-            #     "start_date": test_details.get("startDate", "N/A"),
-            #     "end_date": test_details.get("endDate", "N/A"),
-            #     "guidelines": test_details.get("guidelines", []),
-            #     "contest_id": test_details.get("contestId", "N/A"),
-            # }
-            return JsonResponse(test_details, safe=False)  
-        else:
-            return JsonResponse({"error": "Test not found"}, status=404)
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
-    
-def contest_details(request, contestID):
-    """
-    Fetch the contest details from MongoDB using the contest_id.
-    """
-    try:
-        # Fetch the contest details from the MongoDB collection using contest_id
-        contest_details = assessments_collection.find_one({"contestId": contestID})
-        if contest_details:
-            return JsonResponse(contest_details, safe=False)
-        else:
-            return JsonResponse({"error": "Contest not found"}, status=404)
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
 

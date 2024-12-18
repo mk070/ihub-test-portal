@@ -29,7 +29,7 @@ const ViewTest = () => {
   if (!testDetails) return <div>Loading...</div>;
 
   // Destructure testDetails for easier rendering
-  const { assessmentOverview, testConfiguration, question_ids, problems, visible_to } = testDetails;
+  const { assessmentOverview, testConfiguration, problems, visible_to } = testDetails;
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -46,7 +46,6 @@ const ViewTest = () => {
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Assessment Overview</h2>
         <p><strong>Description:</strong> {assessmentOverview?.description || "N/A"}</p>
-        <p><strong>Max Registrations:</strong> {assessmentOverview?.maxRegistrations || "N/A"}</p>
         <p><strong>Guidelines:</strong> {assessmentOverview?.guidelines || "N/A"}</p>
       </div>
 
@@ -54,9 +53,13 @@ const ViewTest = () => {
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Test Configuration</h2>
         <div className="grid grid-cols-2 gap-4">
-          <p><strong>Sections:</strong> {testConfiguration?.sections || "N/A"}</p>
           <p><strong>Questions:</strong> {testConfiguration?.questions || "N/A"}</p>
-          <p><strong>Duration:</strong> {testConfiguration?.duration || "N/A"}</p>
+          <p>
+            <strong>Duration:</strong>{" "}
+            {testConfiguration?.duration
+              ? `${testConfiguration.duration.hours} hours ${testConfiguration.duration.minutes} minutes`
+              : "N/A"}
+          </p>
           <p><strong>Fullscreen Mode:</strong> {testConfiguration?.fullScreenMode ? "Enabled" : "Disabled"}</p>
           <p><strong>Face Detection:</strong> {testConfiguration?.faceDetection ? "Enabled" : "Disabled"}</p>
           <p><strong>Device Restriction:</strong> {testConfiguration?.deviceRestriction ? "Enabled" : "Disabled"}</p>
@@ -87,9 +90,9 @@ const ViewTest = () => {
       <button
         className="bottom-4 left-4 bg-blue-500 text-white px-4 py-2 rounded m-4"
         onClick={() => navigate('/staffdashboard')}
-        >
-            Previous Page
-        </button>
+      >
+        Previous Page
+      </button>
     </div>
   );
 };

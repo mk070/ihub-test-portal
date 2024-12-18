@@ -33,7 +33,7 @@ const StudentDashboard = () => {
   // Fetch student data and tests
   const fetchStudentData = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/student/profile/", {
+      const response = await axios.get(`"http://localhost:8000/api/student/profile/"`, {
         withCredentials: true, // Include cookies for authentication
       });
 
@@ -110,7 +110,6 @@ const StudentDashboard = () => {
                     />
                   ))
                 ) : (
-
                   <Box className="text-center">
                     <img
                       src={NoExams}
