@@ -114,8 +114,8 @@ const Dashboard = () => {
             {filteredTests.map((test) => {
               const title = test.assessmentName || 'Unnamed Contest';
               const type = test.type || 'General';
-              const date = test.startDate
-                ? new Date(test.startDate).toLocaleDateString()
+              const date = test.endDate
+                ? new Date(test.endDate).toLocaleDateString()
                 : 'Date Unavailable';
               const category = test.category || 'Uncategorized';
               const status = test.status || 'Upcoming';
@@ -123,13 +123,13 @@ const Dashboard = () => {
               return (
                 <TestCard
                   key={test._id || test.contestId}
-                  contestId={test.contestId || test._id}
+                  contestId={test.contestId || test._id} 
                   title={title}
-                  type={type}
+                  type={type} 
                   date={date}
                   category={category}
                   stats={{
-                    Assigned: test.assigned || 0,
+                    Assigned: test.assignedCount || 0,
                     Register: test.register || 0,
                     Completed: test.complete || 0,
                   }}
